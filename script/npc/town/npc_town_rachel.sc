@@ -17,7 +17,7 @@ rachel.gat,65,80,1	shop	野菜商人	919,515,535,516
 // 飛行船NPC
 //------------------------------------------------------------
 ra_fild12.gat,285,207,3	script	見習い神官	914,{
-	if($RachelDonate < 10000) {
+	if($RachelDonate < 3) {
 		mes "[パパイ]";
 		mes "アルナベルツにようこそ！";
 		mes "よい旅を～";
@@ -143,7 +143,7 @@ ra_fild12.gat,45,230,3	script	飛行船ガイド	934,{
 }
 
 airplane.gat,238,54,7	script	旅人	59,{
-	if($RachelDonate >= 10000) {
+	if($RachelDonate >= 3) {
 		mes "[旅人]";
 		mes "そういや、ラヘルの神殿で献金をしてた";
 		mes "綺麗な神官さん……";
@@ -571,7 +571,7 @@ ra_temin.gat,230,303,2	script	信徒フリジア	926,{
 // RA_1QUE -> 0～16
 //------------------------------------------------------------
 ra_temple.gat,116,174,3	script	ネマ#ra	920,{
-	if($RachelDonate < 10000) {
+	if($RachelDonate < 3) {
 		switch(RA_1QUE) {
 		case 0:
 			cutin "ra_nemma03",2;
@@ -778,7 +778,7 @@ ra_temple.gat,116,174,3	script	ネマ#ra	920,{
 		getitem 7570,'@num;
 		set RA_1QUE,1;
 		set $RachelDonate,$RachelDonate+'@num;
-		if($RachelDonate >= 10000) {	//メッセージ未取得
+		if($RachelDonate >= 3) {	//メッセージ未取得
 			cutin "ra_nemma04",2;
 			mes "[ネマ神官]";
 			mes "ありがとうございます！";
@@ -791,7 +791,7 @@ ra_temple.gat,116,174,3	script	ネマ#ra	920,{
 		cutin "ra_nemma03",2;
 		mes "[ネマ神官]";
 		mes "ありがとうございます！";
-		mes "あと " +(10000-$RachelDonate)+ "口を献金して頂くと";
+		mes "あと " +(3-$RachelDonate)+ "口を献金して頂くと";
 		mes "献金を終了する予定です。";
 		next;
 		mes "[ネマ神官]";
@@ -1403,7 +1403,7 @@ ra_temin.gat,170,46,4	script	パノ	920,{
 		mes "[パノ神官]";
 		mes "あの……";
 		mes "抽選券を先に提示してください。";
-		if($RachelDonate < 10000) {
+		if($RachelDonate < 3) {
 			mes "神殿抽選券は、神殿に献金してくれた";
 			mes "方にのみ、お配りしています。";
 			mes "必要ならば、神殿の前にいるネマ神官に";
@@ -1696,7 +1696,7 @@ rachel.gat,242,37,4	script	少年	921,{
 }
 
 ra_temple.gat,119,180,0	script	神殿入口	45,1,1,{
-	if($RachelDonate < 10000 || RA_1QUE >= 10) {
+	if($RachelDonate < 3 || RA_1QUE >= 10) {
 		warp "ra_temin.gat",169,23;
 		end;
 	}
@@ -2734,7 +2734,7 @@ ra_temin.gat,277,159,3	script	ジェド大神官	932,{
 		next;
 		mes "[ジェド大神官]";
 		mes "恐らく……世界を混沌へと導く";
-		mes "兵器が作り出されているのだろう。";
+		mes "平気が作り出されているのだろう。";
 		next;
 		mes "[" +strcharinfo(0)+ "]";
 		mes "そんな……";

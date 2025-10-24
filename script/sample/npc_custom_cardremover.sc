@@ -75,29 +75,6 @@ prt_in.gat,28,73,4	script	賢い老女	78,{
 		delitem 1000,1;
 		delitem 715,1;
 		set '@rate,rand(100);
-		if('@rate < 2) {
-			failedremovecards '@part,0;
-			mes "[賢い老女]";
-			mes "残念だけど完全に失敗したよ。";
-			mes "武具もカードも壊れてしまった。";
-			close;
-		}
-		if('@rate < 6) {
-			failedremovecards '@part,'@failtype;
-			if('@failtype == 1) {
-				mes "[賢い老女]";
-				mes "頑張ったけどね、";
-				mes "カードのほうは全部壊れてしまったよ。";
-				mes "でも武具の方は無事だったよ。";
-			}
-			else {
-				mes "[賢い老女]";
-				mes "不運だったね。";
-				mes "カードを取り外すのはうまくいったけど";
-				mes "武具が壊れてしまったよ。";
-			}
-			close;
-		}
 		if('@rate < 10) {
 			failedremovecards '@part,3;
 			mes "[賢い老女]";

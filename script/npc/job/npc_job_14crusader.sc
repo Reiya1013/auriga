@@ -1226,7 +1226,7 @@ job_cru.gat,168,180,0	script	#CRU_3rdWarp	45,1,1,{
 // ペコペコレンタル
 //------------------------------------------
 
-prontera.gat,164,170,3	script	ペコペコ管理兵	105,{
+prontera.gat,164,170,2	script	ペコペコ管理兵	105,{
 	if(Job != Job_Crusader) {
 		mes "[ペコペコ管理兵]";
 		mes "何の用事でいらっしゃったんですか";

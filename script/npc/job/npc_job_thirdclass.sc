@@ -1060,7 +1060,7 @@ function	script	jobchenge3rd_func	{
 }
 
 //prt_in.gat,162,24,3	script	“]E‘ãsŒW#runeknight	888,{ callfunc "jobchenge3rd_func",Job_RuneKnight,Job_Knight; }
-//morocc.gat,94,141,3	script	“]E‘ãsŒW#warlock	888,{ callfunc "jobchenge3rd_func",Job_Warlock,Job_Wizard; }
+morocc.gat,94,141,3	script	“]E‘ãsŒW#warlock	888,{ callfunc "jobchenge3rd_func",Job_Warlock,Job_Wizard; }
 alberta.gat,223,111,5	script	“]E‘ãsŒW#ranger	888,{ callfunc "jobchenge3rd_func",Job_Ranger,Job_Hunter; }
 //prt_church.gat,103,88,3	script	“]E‘ãsŒW#arch	888,{ callfunc "jobchenge3rd_func",Job_ArchBishop,Job_Priest; }
 //yuno.gat,129,156,3	script	“]E‘ãsŒW#mechanic	888,{ callfunc "jobchenge3rd_func",Job_Mechanic,Job_Blacksmith; }
@@ -1078,7 +1078,7 @@ morocc.gat,156,70,3	script	“]E‘ãsŒW#shad	888,{ callfunc "jobchenge3rd_func",Jo
 // ƒOƒŠƒtƒHƒ“ƒŒƒ“ƒ^ƒ‹
 //------------------------------------------
 
-prontera.gat,125,208,5	script	ƒOƒŠƒtƒHƒ“ŠÇ—•º	105,{
+prontera.gat,164,164,2	script	ƒOƒŠƒtƒHƒ“ŠÇ—•º	105,{
 	if(Job != Job_RoyalGuard) {
 		mes "[ƒOƒŠƒtƒHƒ“ŠÇ—•º]";
 		mes "‰½‚ÌŒä—p‚Å‚·‚©H";

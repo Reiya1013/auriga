@@ -10,8 +10,6 @@ prontera.gat,162,188,4	script	銀行員カプラ	112,{
 	case 1:
 		mes "[銀行員カプラ]";
 		mes "預ける金額を入力してください♪";
-		mes "ちなみに、手数料として";
-		mes "預かり金の1%頂きます。";
 		next;
 		input '@val;
 		mes "[銀行員カプラ]";
@@ -19,11 +17,11 @@ prontera.gat,162,188,4	script	銀行員カプラ	112,{
 			break;
 		}
 		set '@commission,'@val/100;
-		if(Zeny < '@val + '@commission) {
+		if(Zeny < '@val) {
 			mes "持ち金が足りないようですね。";
 			break;
 		}
-		set Zeny,Zeny - ('@val + '@commission);
+		set Zeny,Zeny - '@val;
 		set #kafrabank,#kafrabank + '@val;
 		mes "手数料^135445" + '@commission + "^000000Zeny";
 		mes "頂きますね。";

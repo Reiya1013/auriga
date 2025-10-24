@@ -175,19 +175,6 @@ function	script	KafraMain	{
 
 	//カートサービス
 	function KafraCart {
-		if(getbaseclass(Class) != CLASS_MC) {
-			mes "[カプラ職員]";
-			mes "申し訳ございません。";
-			mes "カートは商人とその上位職専用の";
-			mes "サービスです。";
-			return;
-		}
-		if(checkcart()) {
-			mes "[カプラ職員]";
-			mes "お客様は現在カートを";
-			mes "利用されています。";
-			return;
-		}
 		mes "[カプラ職員]";
 		mes "カート利用料金は" +getarg(9)+ "Zenyです。";
 		mes "また、カートを利用するには";
@@ -404,12 +391,7 @@ function	script	KafraMain	{
 
 //倉庫サービスだけ分離
 function	script	KafraStorage	{
-	if(basicskillcheck() && ((getskilllv(1) < 6 && Job != Job_Summoner) || (getskilllv(5018) < 1 && Job == Job_Summoner))) {
-		mes "[カプラ職員]";
-		mes "倉庫は基本スキルレベル6を";
-		mes "習得してから利用可能となります。";
-	}
-	else if(Zeny<getarg(0)) {
+	if(Zeny<getarg(0)) {
 		mes "[カプラ職員]";
 		mes "お客様、お金が足りません。";
 		mes "倉庫利用料金は"+getarg(0)+"Zenyです。";
@@ -425,6 +407,25 @@ function	script	KafraStorage	{
 	cutin "kafra_01",255;
 	return;
 }
+
+//----------------------------------
+// < プロンテラ - 噴水カプラ >
+//----------------------------------
+
+prontera.gat,158,188,4	script	カプラ職員	115,{
+	cutin "kafra_03",2;
+	setarray '@code,2,3,4,5,6,8,7;
+	setarray '@price,600,1200,1200,1200,1800,2000,1700;
+	callfunc "KafraMain",1,0x1ff,"prt_fild08.gat",170,368,"prontera.gat",155,189,40,800,'@code,'@price;
+	close2;
+	viewpoint 1,146,89,1,0x0000FF;
+	viewpoint 1,282,200,2,0x0000FF;
+	viewpoint 1,151,29,3,0x0000FF;
+	viewpoint 1,29,207,4,0x0000FF;
+	cutin "kafra_03",255;
+	end;
+}
+
 
 //----------------------------------
 // < プロンテラ - 中央 >

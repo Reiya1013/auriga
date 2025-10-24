@@ -2,6 +2,54 @@
 // Ragnarok Online Storage NPC Script	by Blaze
 //==============================================================================
 
+
+// デバック転送
+prontera.gat,157,194,6	script	ソウ子	115,{
+	cutin "kafra_03",2;
+	mes "[ソウ子]";
+	mes "こんにちは。ソウ子です。";
+	mes "こちらではメイン倉庫とサブ倉庫3つを利用できます";
+	mes "倉庫を利用しますか？";
+	next;
+	if(select("お願いします","けっこうです") == 2) {
+		mes "[ソウ子]";
+		mes "いつでもご利用してくださいね。";
+		close2;
+		cutin "kafra_03",255;
+		end;
+	}
+	mes "[ソウ子]";
+	mes "倉庫を選んでください。";
+	next;
+	set @menu,select("メイン倉庫","サブ倉庫01","サブ倉庫02","サブ倉庫03","やっぱやめる");
+	if(@menu != 15) {
+	}
+
+	switch(@menu) {
+	case 1:
+		openstorage;
+		cutin "kafra_03",255;
+		break;
+	case 2:
+		open_s1_storage;
+		cutin "kafra_03",255;
+		break;
+	case 3:
+		open_s2_storage;
+		cutin "kafra_03",255;
+		break;
+	case 4:
+		open_s3_storage;
+		cutin "kafra_03",255;
+		break;
+	}
+	mes "[ソウ子]";
+	mes "いつでもご利用してくださいね。";
+	close2;
+	cutin "kafra_03",255;
+	end;
+}
+
 //============================================================
 // Function
 //------------------------------------------------------------
@@ -56,7 +104,6 @@ function	script	Func_Storage	{
 	openstorage;
 	return;
 }
-
 //============================================================
 // モロク
 //------------------------------------------------------------
@@ -104,11 +151,11 @@ payon.gat,179,66,4	script	サブ倉庫1	464,{
 	callfunc "Func_Storage",50,1;
 	end;
 }
-payon.gat,181,66,4	script	サブ倉庫2	464,{
+payon.gat,179,66,4	script	サブ倉庫2	464,{
 	callfunc "Func_Storage",50,2;
 	end;
 }
-payon.gat,183,66,4	script	サブ倉庫3	464,{
+payon.gat,179,66,4	script	サブ倉庫3	464,{
 	callfunc "Func_Storage",50,3;
 	end;
 }
