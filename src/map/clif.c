@@ -9379,6 +9379,36 @@ void clif_storageitemlist(struct map_session_data *sd, struct storage *stor)
 	return;
 }
 
+void clif_s1_storageitemlist(struct map_session_data *sd, struct s1_storage *stor)
+{
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	clif_storageitemlist_sub(sd->fd, stor->store_item, 0, MAX_STORAGE, msg_txt(215));
+
+	return;
+}
+
+void clif_s2_storageitemlist(struct map_session_data *sd, struct s2_storage *stor)
+{
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	clif_storageitemlist_sub(sd->fd, stor->store_item, 0, MAX_STORAGE, msg_txt(216));
+
+	return;
+}
+
+void clif_s3_storageitemlist(struct map_session_data *sd, struct s3_storage *stor)
+{
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	clif_storageitemlist_sub(sd->fd, stor->store_item, 0, MAX_STORAGE, msg_txt(217));
+
+	return;
+}
+
 /*==========================================
  * カプラさんに預けてある装備リスト
  *------------------------------------------
@@ -9389,6 +9419,33 @@ void clif_storageequiplist(struct map_session_data *sd, struct storage *stor)
 	nullpo_retv(stor);
 
 	clif_storageequiplist_sub(sd->fd, stor->store_item, 0, MAX_STORAGE, msg_txt(208));
+
+	return;
+}
+void clif_s1_storageequiplist(struct map_session_data *sd, struct s1_storage *stor)
+{
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	clif_storageequiplist_sub(sd->fd, stor->store_item, 0, MAX_STORAGE, msg_txt(215));
+
+	return;
+}
+void clif_s2_storageequiplist(struct map_session_data *sd, struct s2_storage *stor)
+{
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	clif_storageequiplist_sub(sd->fd, stor->store_item, 0, MAX_STORAGE, msg_txt(216));
+
+	return;
+}
+void clif_s3_storageequiplist(struct map_session_data *sd, struct s3_storage *stor)
+{
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	clif_storageequiplist_sub(sd->fd, stor->store_item, 0, MAX_STORAGE, msg_txt(217));
 
 	return;
 }
@@ -11397,10 +11454,723 @@ void clif_updatestorageamount(struct map_session_data *sd, struct storage *stor)
 }
 
 /*==========================================
+ * サブ１カプラ倉庫のアイテム数を更新
+ *------------------------------------------
+ */
+void clif_update_s1_storageamount(struct map_session_data *sd, struct s1_storage *stor)
+{
+	int fd;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	fd=sd->fd;
+	WFIFOW(fd,0) = 0xf2;
+	WFIFOW(fd,2) = stor->storage_amount;
+	WFIFOW(fd,4) = MAX_STORAGE;
+	WFIFOSET(fd,packet_db[0xf2].len);
+	
+	return;
+}
+/*==========================================
+ * サブ2カプラ倉庫のアイテム数を更新
+ *------------------------------------------
+ */
+void clif_update_s2_storageamount(struct map_session_data *sd, struct s2_storage *stor)
+{
+	int fd;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	fd=sd->fd;
+	WFIFOW(fd,0) = 0xf2;
+	WFIFOW(fd,2) = stor->storage_amount;
+	WFIFOW(fd,4) = MAX_STORAGE;
+	WFIFOSET(fd,packet_db[0xf2].len);
+	
+	return;
+}
+/*==========================================
+ * サブ3カプラ倉庫のアイテム数を更新
+ *------------------------------------------
+ */
+void clif_update_s3_storageamount(struct map_session_data *sd, struct s3_storage *stor)
+{
+	int fd;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	fd=sd->fd;
+	WFIFOW(fd,0) = 0xf2;
+	WFIFOW(fd,2) = stor->storage_amount;
+	WFIFOW(fd,4) = MAX_STORAGE;
+	WFIFOSET(fd,packet_db[0xf2].len);
+	
+	return;
+}
+
+
+/*==========================================
  * カプラ倉庫にアイテムを追加する
  *------------------------------------------
  */
 void clif_storageitemadded(struct map_session_data *sd, struct storage *stor, int idx, int amount)
+{
+	struct item_data *id;
+	int fd,j;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	fd = sd->fd;
+	id = itemdb_search(stor->store_item[idx].nameid);
+
+#if PACKETVER < 7
+	WFIFOW(fd,0) = 0xf4;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOW(fd,8) = id->view_id;
+	else
+		WFIFOW(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,10) = stor->store_item[idx].identify;
+	WFIFOB(fd,11) = stor->store_item[idx].attribute;
+	WFIFOB(fd,12) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOW(fd,13) = 0;
+			WFIFOW(fd,15) = 0;
+			WFIFOW(fd,17) = 0;
+		} else {
+			WFIFOW(fd,13) = stor->store_item[idx].card[0];
+			WFIFOW(fd,15) = stor->store_item[idx].card[1];
+			WFIFOW(fd,17) = stor->store_item[idx].card[2];
+		}
+		WFIFOW(fd,19) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOW(fd,13) = j;
+		else
+			WFIFOW(fd,13) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOW(fd,15) = j;
+		else
+			WFIFOW(fd,15)= stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOW(fd,17) = j;
+		else
+			WFIFOW(fd,17)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOW(fd,19) = j;
+		else
+			WFIFOW(fd,19) = stor->store_item[idx].card[3];
+	}
+	WFIFOSET(fd,packet_db[0xf4].len);
+#elif PACKETVER < 20150513
+	WFIFOW(fd,0) = 0x1c4;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOW(fd,8) = id->view_id;
+	else
+		WFIFOW(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,10) = id->type;
+	WFIFOB(fd,11) = stor->store_item[idx].identify;
+	WFIFOB(fd,12) = stor->store_item[idx].attribute;
+	WFIFOB(fd,13) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOW(fd,14) = 0;
+			WFIFOW(fd,16) = 0;
+			WFIFOW(fd,18) = 0;
+		} else {
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+			WFIFOW(fd,18) = stor->store_item[idx].card[2];
+		}
+		WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOW(fd,14) = j;
+		else
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOW(fd,16) = j;
+		else
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOW(fd,18) = j;
+		else
+			WFIFOW(fd,18)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOW(fd,20) = j;
+		else
+			WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	}
+	WFIFOSET(fd,packet_db[0x1c4].len);
+#elif PACKETVER < 20180704
+	WFIFOW(fd,0) = 0xa0a;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOW(fd,8) = id->view_id;
+	else
+		WFIFOW(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,10) = id->type;
+	WFIFOB(fd,11) = stor->store_item[idx].identify;
+	WFIFOB(fd,12) = stor->store_item[idx].attribute;
+	WFIFOB(fd,13) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOW(fd,14) = 0;
+			WFIFOW(fd,16) = 0;
+			WFIFOW(fd,18) = 0;
+		} else {
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+			WFIFOW(fd,18) = stor->store_item[idx].card[2];
+		}
+		WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOW(fd,14) = j;
+		else
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOW(fd,16) = j;
+		else
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOW(fd,18) = j;
+		else
+			WFIFOW(fd,18)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOW(fd,20) = j;
+		else
+			WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	}
+	WFIFOW(fd,22) = stor->store_item[idx].opt[0].id;
+	WFIFOW(fd,24) = stor->store_item[idx].opt[0].val;
+	WFIFOB(fd,26) = 0;
+	WFIFOW(fd,27) = stor->store_item[idx].opt[1].id;
+	WFIFOW(fd,29) = stor->store_item[idx].opt[1].val;
+	WFIFOB(fd,31) = 0;
+	WFIFOW(fd,32) = stor->store_item[idx].opt[2].id;
+	WFIFOW(fd,34) = stor->store_item[idx].opt[2].val;
+	WFIFOB(fd,36) = 0;
+	WFIFOW(fd,37) = stor->store_item[idx].opt[3].id;
+	WFIFOW(fd,39) = stor->store_item[idx].opt[3].val;
+	WFIFOB(fd,41) = 0;
+	WFIFOW(fd,42) = stor->store_item[idx].opt[4].id;
+	WFIFOW(fd,44) = stor->store_item[idx].opt[4].val;
+	WFIFOB(fd,46) = 0;
+	WFIFOSET(fd,packet_db[0xa0a].len);
+#else
+	WFIFOW(fd,0) = 0xa0a;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOL(fd,8) = id->view_id;
+	else
+		WFIFOL(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,12) = id->type;
+	WFIFOB(fd,13) = stor->store_item[idx].identify;
+	WFIFOB(fd,14) = stor->store_item[idx].attribute;
+	WFIFOB(fd,15) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOL(fd,16) = 0;
+			WFIFOL(fd,20) = 0;
+			WFIFOL(fd,24) = 0;
+		} else {
+			WFIFOL(fd,16) = stor->store_item[idx].card[0];
+			WFIFOL(fd,20) = stor->store_item[idx].card[1];
+			WFIFOL(fd,24) = stor->store_item[idx].card[2];
+		}
+		WFIFOL(fd,28) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOL(fd,16) = j;
+		else
+			WFIFOL(fd,16) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOL(fd,20) = j;
+		else
+			WFIFOL(fd,20) = stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOL(fd,24) = j;
+		else
+			WFIFOL(fd,24)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOL(fd,28) = j;
+		else
+			WFIFOL(fd,28) = stor->store_item[idx].card[3];
+	}
+	WFIFOW(fd,32) = stor->store_item[idx].opt[0].id;
+	WFIFOW(fd,34) = stor->store_item[idx].opt[0].val;
+	WFIFOB(fd,36) = 0;
+	WFIFOW(fd,37) = stor->store_item[idx].opt[1].id;
+	WFIFOW(fd,39) = stor->store_item[idx].opt[1].val;
+	WFIFOB(fd,41) = 0;
+	WFIFOW(fd,42) = stor->store_item[idx].opt[2].id;
+	WFIFOW(fd,44) = stor->store_item[idx].opt[2].val;
+	WFIFOB(fd,46) = 0;
+	WFIFOW(fd,47) = stor->store_item[idx].opt[3].id;
+	WFIFOW(fd,49) = stor->store_item[idx].opt[3].val;
+	WFIFOB(fd,51) = 0;
+	WFIFOW(fd,52) = stor->store_item[idx].opt[4].id;
+	WFIFOW(fd,54) = stor->store_item[idx].opt[4].val;
+	WFIFOB(fd,56) = 0;
+	WFIFOSET(fd,packet_db[0xa0a].len);
+#endif
+
+	return;
+}
+
+/*==========================================
+ * サブ1カプラ倉庫にアイテムを追加する
+ * 注：メイン倉庫と処理は同等(引数のstorの型が違うだけ)
+ *------------------------------------------
+ */
+void clif_s1_storageitemadded(struct map_session_data *sd, struct s1_storage *stor, int idx, int amount)
+{
+	struct item_data *id;
+	int fd,j;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	fd = sd->fd;
+	id = itemdb_search(stor->store_item[idx].nameid);
+
+#if PACKETVER < 7
+	WFIFOW(fd,0) = 0xf4;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOW(fd,8) = id->view_id;
+	else
+		WFIFOW(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,10) = stor->store_item[idx].identify;
+	WFIFOB(fd,11) = stor->store_item[idx].attribute;
+	WFIFOB(fd,12) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOW(fd,13) = 0;
+			WFIFOW(fd,15) = 0;
+			WFIFOW(fd,17) = 0;
+		} else {
+			WFIFOW(fd,13) = stor->store_item[idx].card[0];
+			WFIFOW(fd,15) = stor->store_item[idx].card[1];
+			WFIFOW(fd,17) = stor->store_item[idx].card[2];
+		}
+		WFIFOW(fd,19) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOW(fd,13) = j;
+		else
+			WFIFOW(fd,13) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOW(fd,15) = j;
+		else
+			WFIFOW(fd,15)= stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOW(fd,17) = j;
+		else
+			WFIFOW(fd,17)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOW(fd,19) = j;
+		else
+			WFIFOW(fd,19) = stor->store_item[idx].card[3];
+	}
+	WFIFOSET(fd,packet_db[0xf4].len);
+#elif PACKETVER < 20150513
+	WFIFOW(fd,0) = 0x1c4;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOW(fd,8) = id->view_id;
+	else
+		WFIFOW(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,10) = id->type;
+	WFIFOB(fd,11) = stor->store_item[idx].identify;
+	WFIFOB(fd,12) = stor->store_item[idx].attribute;
+	WFIFOB(fd,13) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOW(fd,14) = 0;
+			WFIFOW(fd,16) = 0;
+			WFIFOW(fd,18) = 0;
+		} else {
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+			WFIFOW(fd,18) = stor->store_item[idx].card[2];
+		}
+		WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOW(fd,14) = j;
+		else
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOW(fd,16) = j;
+		else
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOW(fd,18) = j;
+		else
+			WFIFOW(fd,18)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOW(fd,20) = j;
+		else
+			WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	}
+	WFIFOSET(fd,packet_db[0x1c4].len);
+#elif PACKETVER < 20180704
+	WFIFOW(fd,0) = 0xa0a;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOW(fd,8) = id->view_id;
+	else
+		WFIFOW(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,10) = id->type;
+	WFIFOB(fd,11) = stor->store_item[idx].identify;
+	WFIFOB(fd,12) = stor->store_item[idx].attribute;
+	WFIFOB(fd,13) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOW(fd,14) = 0;
+			WFIFOW(fd,16) = 0;
+			WFIFOW(fd,18) = 0;
+		} else {
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+			WFIFOW(fd,18) = stor->store_item[idx].card[2];
+		}
+		WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOW(fd,14) = j;
+		else
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOW(fd,16) = j;
+		else
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOW(fd,18) = j;
+		else
+			WFIFOW(fd,18)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOW(fd,20) = j;
+		else
+			WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	}
+	WFIFOW(fd,22) = stor->store_item[idx].opt[0].id;
+	WFIFOW(fd,24) = stor->store_item[idx].opt[0].val;
+	WFIFOB(fd,26) = 0;
+	WFIFOW(fd,27) = stor->store_item[idx].opt[1].id;
+	WFIFOW(fd,29) = stor->store_item[idx].opt[1].val;
+	WFIFOB(fd,31) = 0;
+	WFIFOW(fd,32) = stor->store_item[idx].opt[2].id;
+	WFIFOW(fd,34) = stor->store_item[idx].opt[2].val;
+	WFIFOB(fd,36) = 0;
+	WFIFOW(fd,37) = stor->store_item[idx].opt[3].id;
+	WFIFOW(fd,39) = stor->store_item[idx].opt[3].val;
+	WFIFOB(fd,41) = 0;
+	WFIFOW(fd,42) = stor->store_item[idx].opt[4].id;
+	WFIFOW(fd,44) = stor->store_item[idx].opt[4].val;
+	WFIFOB(fd,46) = 0;
+	WFIFOSET(fd,packet_db[0xa0a].len);
+#else
+	WFIFOW(fd,0) = 0xa0a;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOL(fd,8) = id->view_id;
+	else
+		WFIFOL(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,12) = id->type;
+	WFIFOB(fd,13) = stor->store_item[idx].identify;
+	WFIFOB(fd,14) = stor->store_item[idx].attribute;
+	WFIFOB(fd,15) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOL(fd,16) = 0;
+			WFIFOL(fd,20) = 0;
+			WFIFOL(fd,24) = 0;
+		} else {
+			WFIFOL(fd,16) = stor->store_item[idx].card[0];
+			WFIFOL(fd,20) = stor->store_item[idx].card[1];
+			WFIFOL(fd,24) = stor->store_item[idx].card[2];
+		}
+		WFIFOL(fd,28) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOL(fd,16) = j;
+		else
+			WFIFOL(fd,16) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOL(fd,20) = j;
+		else
+			WFIFOL(fd,20) = stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOL(fd,24) = j;
+		else
+			WFIFOL(fd,24)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOL(fd,28) = j;
+		else
+			WFIFOL(fd,28) = stor->store_item[idx].card[3];
+	}
+	WFIFOW(fd,32) = stor->store_item[idx].opt[0].id;
+	WFIFOW(fd,34) = stor->store_item[idx].opt[0].val;
+	WFIFOB(fd,36) = 0;
+	WFIFOW(fd,37) = stor->store_item[idx].opt[1].id;
+	WFIFOW(fd,39) = stor->store_item[idx].opt[1].val;
+	WFIFOB(fd,41) = 0;
+	WFIFOW(fd,42) = stor->store_item[idx].opt[2].id;
+	WFIFOW(fd,44) = stor->store_item[idx].opt[2].val;
+	WFIFOB(fd,46) = 0;
+	WFIFOW(fd,47) = stor->store_item[idx].opt[3].id;
+	WFIFOW(fd,49) = stor->store_item[idx].opt[3].val;
+	WFIFOB(fd,51) = 0;
+	WFIFOW(fd,52) = stor->store_item[idx].opt[4].id;
+	WFIFOW(fd,54) = stor->store_item[idx].opt[4].val;
+	WFIFOB(fd,56) = 0;
+	WFIFOSET(fd,packet_db[0xa0a].len);
+#endif
+
+	return;
+}
+
+/*==========================================
+ * サブ2カプラ倉庫にアイテムを追加する
+ * 注：メイン倉庫と処理は同等(引数のstorの型が違うだけ)
+ *------------------------------------------
+ */
+void clif_s2_storageitemadded(struct map_session_data *sd, struct s2_storage *stor, int idx, int amount)
+{
+	struct item_data *id;
+	int fd,j;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	fd = sd->fd;
+	id = itemdb_search(stor->store_item[idx].nameid);
+
+#if PACKETVER < 7
+	WFIFOW(fd,0) = 0xf4;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOW(fd,8) = id->view_id;
+	else
+		WFIFOW(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,10) = stor->store_item[idx].identify;
+	WFIFOB(fd,11) = stor->store_item[idx].attribute;
+	WFIFOB(fd,12) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOW(fd,13) = 0;
+			WFIFOW(fd,15) = 0;
+			WFIFOW(fd,17) = 0;
+		} else {
+			WFIFOW(fd,13) = stor->store_item[idx].card[0];
+			WFIFOW(fd,15) = stor->store_item[idx].card[1];
+			WFIFOW(fd,17) = stor->store_item[idx].card[2];
+		}
+		WFIFOW(fd,19) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOW(fd,13) = j;
+		else
+			WFIFOW(fd,13) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOW(fd,15) = j;
+		else
+			WFIFOW(fd,15)= stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOW(fd,17) = j;
+		else
+			WFIFOW(fd,17)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOW(fd,19) = j;
+		else
+			WFIFOW(fd,19) = stor->store_item[idx].card[3];
+	}
+	WFIFOSET(fd,packet_db[0xf4].len);
+#elif PACKETVER < 20150513
+	WFIFOW(fd,0) = 0x1c4;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOW(fd,8) = id->view_id;
+	else
+		WFIFOW(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,10) = id->type;
+	WFIFOB(fd,11) = stor->store_item[idx].identify;
+	WFIFOB(fd,12) = stor->store_item[idx].attribute;
+	WFIFOB(fd,13) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOW(fd,14) = 0;
+			WFIFOW(fd,16) = 0;
+			WFIFOW(fd,18) = 0;
+		} else {
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+			WFIFOW(fd,18) = stor->store_item[idx].card[2];
+		}
+		WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOW(fd,14) = j;
+		else
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOW(fd,16) = j;
+		else
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOW(fd,18) = j;
+		else
+			WFIFOW(fd,18)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOW(fd,20) = j;
+		else
+			WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	}
+	WFIFOSET(fd,packet_db[0x1c4].len);
+#elif PACKETVER < 20180704
+	WFIFOW(fd,0) = 0xa0a;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOW(fd,8) = id->view_id;
+	else
+		WFIFOW(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,10) = id->type;
+	WFIFOB(fd,11) = stor->store_item[idx].identify;
+	WFIFOB(fd,12) = stor->store_item[idx].attribute;
+	WFIFOB(fd,13) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOW(fd,14) = 0;
+			WFIFOW(fd,16) = 0;
+			WFIFOW(fd,18) = 0;
+		} else {
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+			WFIFOW(fd,18) = stor->store_item[idx].card[2];
+		}
+		WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOW(fd,14) = j;
+		else
+			WFIFOW(fd,14) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOW(fd,16) = j;
+		else
+			WFIFOW(fd,16) = stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOW(fd,18) = j;
+		else
+			WFIFOW(fd,18)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOW(fd,20) = j;
+		else
+			WFIFOW(fd,20) = stor->store_item[idx].card[3];
+	}
+	WFIFOW(fd,22) = stor->store_item[idx].opt[0].id;
+	WFIFOW(fd,24) = stor->store_item[idx].opt[0].val;
+	WFIFOB(fd,26) = 0;
+	WFIFOW(fd,27) = stor->store_item[idx].opt[1].id;
+	WFIFOW(fd,29) = stor->store_item[idx].opt[1].val;
+	WFIFOB(fd,31) = 0;
+	WFIFOW(fd,32) = stor->store_item[idx].opt[2].id;
+	WFIFOW(fd,34) = stor->store_item[idx].opt[2].val;
+	WFIFOB(fd,36) = 0;
+	WFIFOW(fd,37) = stor->store_item[idx].opt[3].id;
+	WFIFOW(fd,39) = stor->store_item[idx].opt[3].val;
+	WFIFOB(fd,41) = 0;
+	WFIFOW(fd,42) = stor->store_item[idx].opt[4].id;
+	WFIFOW(fd,44) = stor->store_item[idx].opt[4].val;
+	WFIFOB(fd,46) = 0;
+	WFIFOSET(fd,packet_db[0xa0a].len);
+#else
+	WFIFOW(fd,0) = 0xa0a;
+	WFIFOW(fd,2) = idx+1;
+	WFIFOL(fd,4) = amount;
+	if(id->view_id > 0)
+		WFIFOL(fd,8) = id->view_id;
+	else
+		WFIFOL(fd,8) = stor->store_item[idx].nameid;
+	WFIFOB(fd,12) = id->type;
+	WFIFOB(fd,13) = stor->store_item[idx].identify;
+	WFIFOB(fd,14) = stor->store_item[idx].attribute;
+	WFIFOB(fd,15) = stor->store_item[idx].refine;
+	if(itemdb_isspecial(stor->store_item[idx].card[0])) {
+		if(id->flag.pet_egg) {
+			WFIFOL(fd,16) = 0;
+			WFIFOL(fd,20) = 0;
+			WFIFOL(fd,24) = 0;
+		} else {
+			WFIFOL(fd,16) = stor->store_item[idx].card[0];
+			WFIFOL(fd,20) = stor->store_item[idx].card[1];
+			WFIFOL(fd,24) = stor->store_item[idx].card[2];
+		}
+		WFIFOL(fd,28) = stor->store_item[idx].card[3];
+	} else {
+		if(stor->store_item[idx].card[0] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[0])) > 0)
+			WFIFOL(fd,16) = j;
+		else
+			WFIFOL(fd,16) = stor->store_item[idx].card[0];
+		if(stor->store_item[idx].card[1] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[1])) > 0)
+			WFIFOL(fd,20) = j;
+		else
+			WFIFOL(fd,20) = stor->store_item[idx].card[1];
+		if(stor->store_item[idx].card[2] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[2])) > 0)
+			WFIFOL(fd,24) = j;
+		else
+			WFIFOL(fd,24)= stor->store_item[idx].card[2];
+		if(stor->store_item[idx].card[3] > 0 && (j = itemdb_viewid(stor->store_item[idx].card[3])) > 0)
+			WFIFOL(fd,28) = j;
+		else
+			WFIFOL(fd,28) = stor->store_item[idx].card[3];
+	}
+	WFIFOW(fd,32) = stor->store_item[idx].opt[0].id;
+	WFIFOW(fd,34) = stor->store_item[idx].opt[0].val;
+	WFIFOB(fd,36) = 0;
+	WFIFOW(fd,37) = stor->store_item[idx].opt[1].id;
+	WFIFOW(fd,39) = stor->store_item[idx].opt[1].val;
+	WFIFOB(fd,41) = 0;
+	WFIFOW(fd,42) = stor->store_item[idx].opt[2].id;
+	WFIFOW(fd,44) = stor->store_item[idx].opt[2].val;
+	WFIFOB(fd,46) = 0;
+	WFIFOW(fd,47) = stor->store_item[idx].opt[3].id;
+	WFIFOW(fd,49) = stor->store_item[idx].opt[3].val;
+	WFIFOB(fd,51) = 0;
+	WFIFOW(fd,52) = stor->store_item[idx].opt[4].id;
+	WFIFOW(fd,54) = stor->store_item[idx].opt[4].val;
+	WFIFOB(fd,56) = 0;
+	WFIFOSET(fd,packet_db[0xa0a].len);
+#endif
+
+	return;
+}
+
+/*==========================================
+ * サブ3カプラ倉庫にアイテムを追加する
+ * 注：メイン倉庫と処理は同等(引数のstorの型が違うだけ)
+ *------------------------------------------
+ */
+void clif_s3_storageitemadded(struct map_session_data *sd, struct s3_storage *stor, int idx, int amount)
 {
 	struct item_data *id;
 	int fd,j;
@@ -24909,6 +25679,12 @@ static void clif_parse_MoveToKafra(int fd,struct map_session_data *sd, int cmd)
 		storage_guild_storageadd(sd, idx, amount);
 	else if(sd->state.storage_flag==1)
 		storage_storageadd(sd, idx, amount);
+	else if(sd->state.storage_flag==3)
+		s1_storage_storageadd(sd, idx, amount);
+	else if(sd->state.storage_flag==4)
+		s2_storage_storageadd(sd, idx, amount);
+	else if(sd->state.storage_flag==5)
+		s3_storage_storageadd(sd, idx, amount);
 
 	return;
 }
@@ -24933,6 +25709,12 @@ static void clif_parse_MoveFromKafra(int fd,struct map_session_data *sd, int cmd
 		storage_guild_storageget(sd, idx, amount);
 	else if(sd->state.storage_flag==1)
 		storage_storageget(sd, idx, amount);
+	else if(sd->state.storage_flag==3)
+		s1_storage_storageget(sd, idx, amount);
+	else if(sd->state.storage_flag==4)
+		s2_storage_storageget(sd, idx, amount);
+	else if(sd->state.storage_flag==5)
+		s3_storage_storageget(sd, idx, amount);
 
 	return;
 }
@@ -24958,6 +25740,12 @@ static void clif_parse_MoveToKafraFromCart(int fd,struct map_session_data *sd, i
 		storage_guild_storageaddfromcart(sd, idx, amount);
 	else if(sd->state.storage_flag==1)
 		storage_storageaddfromcart(sd, idx, amount);
+	else if(sd->state.storage_flag==3)
+		s1_storage_storageaddfromcart(sd, idx, amount);
+	else if(sd->state.storage_flag==4)
+		s2_storage_storageaddfromcart(sd, idx, amount);
+	else if(sd->state.storage_flag==5)
+		s3_storage_storageaddfromcart(sd, idx, amount);
 
 	return;
 }
@@ -24983,6 +25771,12 @@ static void clif_parse_MoveFromKafraToCart(int fd,struct map_session_data *sd, i
 		storage_guild_storagegettocart(sd, idx, amount);
 	else if(sd->state.storage_flag==1)
 		storage_storagegettocart(sd, idx, amount);
+	else if(sd->state.storage_flag==3)
+		s1_storage_storagegettocart(sd, idx, amount);
+	else if(sd->state.storage_flag==4)
+		s2_storage_storagegettocart(sd, idx, amount);
+	else if(sd->state.storage_flag==5)
+		s3_storage_storagegettocart(sd, idx, amount);
 
 	return;
 }
@@ -24994,11 +25788,17 @@ static void clif_parse_MoveFromKafraToCart(int fd,struct map_session_data *sd, i
 static void clif_parse_CloseKafra(int fd,struct map_session_data *sd, int cmd)
 {
 	nullpo_retv(sd);
-
+	
 	if(sd->state.storage_flag==2) {
 		storage_guild_storageclose(sd);
 	} else if(sd->state.storage_flag==1) {
 		storage_storageclose(sd);
+	} else if(sd->state.storage_flag==3) {
+		s1_storage_storageclose(sd);
+	} else if(sd->state.storage_flag==4) {
+		s2_storage_storageclose(sd);
+	} else if(sd->state.storage_flag==5) {
+		s3_storage_storageclose(sd);
 	} else {
 		sd->state.storage_flag = 0;
 		clif_storageclose(sd);

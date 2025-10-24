@@ -88,6 +88,9 @@ ATCOMMAND_FUNC(save);
 ATCOMMAND_FUNC(load);
 ATCOMMAND_FUNC(speed);
 ATCOMMAND_FUNC(storage);
+ATCOMMAND_FUNC(s1_storage);
+ATCOMMAND_FUNC(s2_storage);
+ATCOMMAND_FUNC(s3_storage);
 ATCOMMAND_FUNC(guildstorage);
 ATCOMMAND_FUNC(option);
 ATCOMMAND_FUNC(hide);
@@ -254,6 +257,13 @@ static AtCommandInfo atcommand_info[] = {
 	{ AtCommand_Load,               "@load",             0, atcommand_load,                NULL },
 	{ AtCommand_Speed,              "@speed",            0, atcommand_speed,               NULL },
 	{ AtCommand_Storage,            "@storage",          0, atcommand_storage,             NULL },
+	{ AtCommand_s1_Storage,         "@s1_storage",       0, atcommand_s1_storage,          NULL },
+	{ AtCommand_s2_Storage,         "@s2_storage",       0, atcommand_s2_storage,          NULL },
+	{ AtCommand_s3_Storage,         "@s3_storage",       0, atcommand_s3_storage,          NULL },
+	{ AtCommand_Storage,            "@s0",               0, atcommand_storage,             NULL },
+	{ AtCommand_s1_Storage,         "@s1",               0, atcommand_s1_storage,          NULL },
+	{ AtCommand_s2_Storage,         "@s2",               0, atcommand_s2_storage,          NULL },
+	{ AtCommand_s3_Storage,         "@s3",               0, atcommand_s3_storage,          NULL },
 	{ AtCommand_GuildStorage,       "@gstorage",         0, atcommand_guildstorage,        NULL },
 	{ AtCommand_Option,             "@option",           0, atcommand_option,              NULL },
 	{ AtCommand_Hide,               "@hide",             0, atcommand_hide,                NULL },
@@ -1012,6 +1022,27 @@ int atcommand_speed(const int fd, struct map_session_data* sd, AtCommandType com
 int atcommand_storage(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
 {
 	if (storage_storageopen(sd) == 1)
+		clif_displaymessage(fd, msg_txt(130));
+
+	return 0;
+}
+int atcommand_s1_storage(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
+{
+	if (s1_storage_storageopen(sd) == 1)
+		clif_displaymessage(fd, msg_txt(130));
+
+	return 0;
+}
+int atcommand_s2_storage(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
+{
+	if (s2_storage_storageopen(sd) == 1)
+		clif_displaymessage(fd, msg_txt(130));
+
+	return 0;
+}
+int atcommand_s3_storage(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
+{
+	if (s3_storage_storageopen(sd) == 1)
 		clif_displaymessage(fd, msg_txt(130));
 
 	return 0;

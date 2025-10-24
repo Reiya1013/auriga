@@ -36,9 +36,15 @@
 #include "storagedb_txt.h"
 
 static struct dbt *storage_db = NULL;
+static struct dbt *s1_storage_db = NULL;
+static struct dbt *s2_storage_db = NULL;
+static struct dbt *s3_storage_db = NULL;
 
 // ファイル名のデフォルト
 static char storage_txt[1024] = "save/storage.txt";
+static char s1_storage_txt[1024]  = "save/s1_storage.txt";
+static char s2_storage_txt[1024]  = "save/s2_storage.txt";
+static char s3_storage_txt[1024]  = "save/s3_storage.txt";
 static char guild_storage_txt[1024] = "save/g_storage.txt";
 
 #ifdef TXT_JOURNAL
@@ -60,6 +66,15 @@ int storagedb_txt_config_read_sub(const char* w1,const char* w2)
 {
 	if(strcmpi(w1,"storage_txt")==0){
 		strncpy(storage_txt, w2, sizeof(storage_txt) - 1);
+	}
+	else if(strcmpi(w1,"s1_storage_txt")==0){
+		strncpy(s1_storage_txt, w2, sizeof(s1_storage_txt) - 1);
+	}
+	else if(strcmpi(w1,"s2_storage_txt")==0){
+		strncpy(s2_storage_txt, w2, sizeof(s2_storage_txt) - 1);
+	}
+	else if(strcmpi(w1,"s3_storage_txt")==0){
+		strncpy(s3_storage_txt, w2, sizeof(s3_storage_txt) - 1);
 	}
 	else if(strcmpi(w1,"guild_storage_txt")==0){
 		strncpy(guild_storage_txt, w2, sizeof(guild_storage_txt) - 1);
@@ -323,6 +338,707 @@ bool storagedb_txt_delete(int account_id)
 	}
 	return true;
 }
+
+
+/*==========================================
+ * サブ1倉庫データを文字列へ変換
+ *------------------------------------------
+ */
+static int s1_storage_tostr(char *str, struct s1_storage *p)
+{
+	int i, f = 0;
+	char *str_p = str;
+
+	nullpo_retr(1, p);
+
+	str_p += snprintf(str_p, 65536 - (size_t)(str_p - str), "%d,%d\t", p->account_id, p->storage_amount);
+
+	for(i = 0; i < MAX_STORAGE; i++) {
+		if(p->store_item[i].nameid && p->store_item[i].amount) {
+			str_p += snprintf(str_p, 65536 - (size_t)(str_p - str), "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%u,%d ",
+				p->store_item[i].id,p->store_item[i].nameid,p->store_item[i].amount,p->store_item[i].equip,
+				p->store_item[i].identify,p->store_item[i].refine,p->store_item[i].attribute,
+				p->store_item[i].card[0],p->store_item[i].card[1],p->store_item[i].card[2],p->store_item[i].card[3],
+				p->store_item[i].opt[0].id,p->store_item[i].opt[0].val,p->store_item[i].opt[1].id,p->store_item[i].opt[1].val,p->store_item[i].opt[2].id,p->store_item[i].opt[2].val,
+				p->store_item[i].opt[3].id,p->store_item[i].opt[3].val,p->store_item[i].opt[4].id,p->store_item[i].opt[4].val,
+				p->store_item[i].limit,p->store_item[i].private_);
+			f++;
+		}
+	}
+	*(str_p++) = '\t';
+
+	*str_p = '\0';
+	if(!f)
+		str[0] = 0;
+
+	return 0;
+}
+
+/*==========================================
+ * サブ1倉庫データを文字列から変換
+ *------------------------------------------
+ */
+static int s1_storage_fromstr(char *str, struct s1_storage *p)
+{
+	int tmp_int[23];
+	int set, next, len, i;
+
+	nullpo_retr(1, p);
+
+	set = sscanf(str, "%d,%d%n", &tmp_int[0], &tmp_int[1], &next);
+	p->storage_amount = tmp_int[1];
+
+	if(set != 2)
+		return 1;
+	if(str[next] == '\n' || str[next] == '\r')
+		return 0;
+	next++;
+	for(i = 0; str[next] && str[next] != '\t'; i++){
+		// Auriga-1369以降の形式
+		set = sscanf(str + next, "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%u,%d%n",
+			&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
+			&tmp_int[4],&tmp_int[5],&tmp_int[6],
+			&tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],
+			&tmp_int[11],&tmp_int[12],&tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],
+			&tmp_int[17],&tmp_int[18],&tmp_int[19],&tmp_int[20],
+			&tmp_int[21],&tmp_int[22],&len);
+
+		if(set != 23)
+		{
+			// Auriga-0300以降の形式
+			tmp_int[11] = 0;	// opt[0].id
+			tmp_int[12] = 0;	// opt[0].val
+			tmp_int[13] = 0;	// opt[1].id
+			tmp_int[14] = 0;	// opt[1].val
+			tmp_int[15] = 0;	// opt[2].id
+			tmp_int[16] = 0;	// opt[2].val
+			tmp_int[17] = 0;	// opt[3].id
+			tmp_int[18] = 0;	// opt[3].val
+			tmp_int[19] = 0;	// opt[4].id
+			tmp_int[20] = 0;	// opt[4].val
+			tmp_int[22] = 0;	// private
+			set = sscanf(str + next, "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%u%n",
+				&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
+				&tmp_int[4],&tmp_int[5],&tmp_int[6],
+				&tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],
+				&tmp_int[21],&len);
+			if(set != 12) {
+				tmp_int[21] = 0;	// limit
+				set = sscanf(str + next, "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d%n",
+					&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
+					&tmp_int[4],&tmp_int[5],&tmp_int[6],
+					&tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],&len);
+				if(set != 11)
+					return 1;
+			}
+		}
+		if(i < MAX_STORAGE) {
+			p->store_item[i].id         = (unsigned int)tmp_int[0];
+			p->store_item[i].nameid     = tmp_int[1];
+			p->store_item[i].amount     = tmp_int[2];
+			p->store_item[i].equip      = (unsigned int)tmp_int[3];
+			p->store_item[i].identify   = tmp_int[4];
+			p->store_item[i].refine     = tmp_int[5];
+			p->store_item[i].attribute  = tmp_int[6];
+			p->store_item[i].card[0]    = tmp_int[7];
+			p->store_item[i].card[1]    = tmp_int[8];
+			p->store_item[i].card[2]    = tmp_int[9];
+			p->store_item[i].card[3]    = tmp_int[10];
+			p->store_item[i].opt[0].id  = tmp_int[11];
+			p->store_item[i].opt[0].val = tmp_int[12];
+			p->store_item[i].opt[1].id  = tmp_int[13];
+			p->store_item[i].opt[1].val = tmp_int[14];
+			p->store_item[i].opt[2].id  = tmp_int[15];
+			p->store_item[i].opt[2].val = tmp_int[16];
+			p->store_item[i].opt[3].id  = tmp_int[17];
+			p->store_item[i].opt[3].val = tmp_int[18];
+			p->store_item[i].opt[4].id  = tmp_int[19];
+			p->store_item[i].opt[4].val = tmp_int[20];
+			p->store_item[i].limit      = (unsigned int)tmp_int[21];
+			p->store_item[i].private_   = tmp_int[22];
+		}
+		next += len;
+		if(str[next] == ' ')
+			next++;
+	}
+	return 0;
+}
+
+/*==========================================
+ * アカウントIDからサブ1倉庫データをロード
+ * （新規倉庫追加可能）
+ *------------------------------------------
+ */
+const struct s1_storage* s1_storagedb_txt_load(int account_id)
+{
+	struct s1_storage *s = (struct s1_storage *)numdb_search(s1_storage_db, account_id);
+
+	if(s == NULL) {
+		s = (struct s1_storage *)aCalloc(1, sizeof(struct s1_storage));
+		s->account_id = account_id;
+		numdb_insert(s1_storage_db, s->account_id, s);
+	}
+	return s;
+}
+
+/*==========================================
+ * サブ1倉庫データのセーブ
+ *------------------------------------------
+ */
+bool s1_storagedb_txt_save(struct s1_storage *s2)
+{
+	struct s1_storage *s1;
+
+	nullpo_retr(false, s2);
+
+	s1 = (struct s1_storage *)numdb_search(s1_storage_db, s2->account_id);
+	if(s1 == NULL) {
+		s1 = (struct s1_storage *)aCalloc(1, sizeof(struct s1_storage));
+		s1->account_id = s2->account_id;
+		numdb_insert(s1_storage_db, s2->account_id, s1);
+	}
+	memcpy(s1, s2, sizeof(struct s1_storage));
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+		journal_write( &storage_journal, s1->account_id, s1 );
+#endif
+	return true;
+}
+
+/*==========================================
+ * サブ1倉庫データの同期
+ *------------------------------------------
+ */
+static int s1_storagedb_txt_sync_sub(void *key, void *data, va_list ap)
+{
+	char line[65536];
+	FILE *fp;
+
+	s1_storage_tostr(line, (struct s1_storage *)data);
+	fp = va_arg(ap, FILE *);
+	if(*line)
+		fprintf(fp, "%s" NEWLINE, line);
+
+	return 0;
+}
+
+int s1_storagedb_txt_sync(void)
+{
+	FILE *fp;
+	int lock;
+
+	if( !s1_storage_db )
+		return 1;
+
+	if( (fp = lock_fopen(s1_storage_txt, &lock)) == NULL ) {
+		printf("storagedb_txt_sync: can't write [%s] !!! data is lost !!!\n", s1_storage_txt);
+		return 1;
+	}
+	numdb_foreach(s1_storage_db, s1_storagedb_txt_sync_sub, fp);
+	lock_fclose(fp, s1_storage_txt, &lock);
+
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+	{
+		// コミットしたのでジャーナルを新規作成する
+		journal_final( &storage_journal );
+		journal_create( &storage_journal, sizeof(struct s1_storage), storage_journal_cache, storage_journal_file );
+	}
+#endif
+	return 0;
+}
+
+/*==========================================
+ * サブ1倉庫データ削除
+ *------------------------------------------
+ */
+bool s1_storagedb_txt_delete(int account_id)
+{
+	struct s1_storage *s = (struct s1_storage *)numdb_search(s1_storage_db, account_id);
+
+	if(s) {
+		int i;
+		for(i = 0; i < s->storage_amount; i++) {
+			// ペット削除
+			if(s->store_item[i].card[0] == (int)0xff00)
+				petdb_delete(*((int *)(&s->store_item[i].card[1])));
+		}
+		numdb_erase(s1_storage_db, account_id);
+		aFree(s);
+#ifdef TXT_JOURNAL
+		if( storage_journal_enable )
+			journal_write( &storage_journal, account_id, NULL );
+#endif
+	}
+	return true;
+}
+
+/*==========================================
+ * サブ2倉庫データを文字列へ変換
+ *------------------------------------------
+ */
+static int s2_storage_tostr(char *str, struct s2_storage *p)
+{
+	int i, f = 0;
+	char *str_p = str;
+
+	nullpo_retr(1, p);
+
+	str_p += snprintf(str_p, 65536 - (size_t)(str_p - str), "%d,%d\t", p->account_id, p->storage_amount);
+
+	for(i = 0; i < MAX_STORAGE; i++) {
+		if(p->store_item[i].nameid && p->store_item[i].amount) {
+			str_p += snprintf(str_p, 65536 - (size_t)(str_p - str), "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%u,%d ",
+				p->store_item[i].id,p->store_item[i].nameid,p->store_item[i].amount,p->store_item[i].equip,
+				p->store_item[i].identify,p->store_item[i].refine,p->store_item[i].attribute,
+				p->store_item[i].card[0],p->store_item[i].card[1],p->store_item[i].card[2],p->store_item[i].card[3],
+				p->store_item[i].opt[0].id,p->store_item[i].opt[0].val,p->store_item[i].opt[1].id,p->store_item[i].opt[1].val,p->store_item[i].opt[2].id,p->store_item[i].opt[2].val,
+				p->store_item[i].opt[3].id,p->store_item[i].opt[3].val,p->store_item[i].opt[4].id,p->store_item[i].opt[4].val,
+				p->store_item[i].limit,p->store_item[i].private_);
+			f++;
+		}
+	}
+	*(str_p++) = '\t';
+
+	*str_p = '\0';
+	if(!f)
+		str[0] = 0;
+
+	return 0;
+}
+
+/*==========================================
+ * サブ2倉庫データを文字列から変換
+ *------------------------------------------
+ */
+static int s2_storage_fromstr(char *str, struct s2_storage *p)
+{
+	int tmp_int[23];
+	int set, next, len, i;
+
+	nullpo_retr(1, p);
+
+	set = sscanf(str, "%d,%d%n", &tmp_int[0], &tmp_int[1], &next);
+	p->storage_amount = tmp_int[1];
+
+	if(set != 2)
+		return 1;
+	if(str[next] == '\n' || str[next] == '\r')
+		return 0;
+	next++;
+	for(i = 0; str[next] && str[next] != '\t'; i++){
+		// Auriga-1369以降の形式
+		set = sscanf(str + next, "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%u,%d%n",
+			&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
+			&tmp_int[4],&tmp_int[5],&tmp_int[6],
+			&tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],
+			&tmp_int[11],&tmp_int[12],&tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],
+			&tmp_int[17],&tmp_int[18],&tmp_int[19],&tmp_int[20],
+			&tmp_int[21],&tmp_int[22],&len);
+
+		if(set != 23)
+		{
+			// Auriga-0300以降の形式
+			tmp_int[11] = 0;	// opt[0].id
+			tmp_int[12] = 0;	// opt[0].val
+			tmp_int[13] = 0;	// opt[1].id
+			tmp_int[14] = 0;	// opt[1].val
+			tmp_int[15] = 0;	// opt[2].id
+			tmp_int[16] = 0;	// opt[2].val
+			tmp_int[17] = 0;	// opt[3].id
+			tmp_int[18] = 0;	// opt[3].val
+			tmp_int[19] = 0;	// opt[4].id
+			tmp_int[20] = 0;	// opt[4].val
+			tmp_int[22] = 0;	// private
+			set = sscanf(str + next, "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%u%n",
+				&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
+				&tmp_int[4],&tmp_int[5],&tmp_int[6],
+				&tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],
+				&tmp_int[21],&len);
+			if(set != 12) {
+				tmp_int[21] = 0;	// limit
+				set = sscanf(str + next, "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d%n",
+					&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
+					&tmp_int[4],&tmp_int[5],&tmp_int[6],
+					&tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],&len);
+				if(set != 11)
+					return 1;
+			}
+		}
+		if(i < MAX_STORAGE) {
+			p->store_item[i].id         = (unsigned int)tmp_int[0];
+			p->store_item[i].nameid     = tmp_int[1];
+			p->store_item[i].amount     = tmp_int[2];
+			p->store_item[i].equip      = (unsigned int)tmp_int[3];
+			p->store_item[i].identify   = tmp_int[4];
+			p->store_item[i].refine     = tmp_int[5];
+			p->store_item[i].attribute  = tmp_int[6];
+			p->store_item[i].card[0]    = tmp_int[7];
+			p->store_item[i].card[1]    = tmp_int[8];
+			p->store_item[i].card[2]    = tmp_int[9];
+			p->store_item[i].card[3]    = tmp_int[10];
+			p->store_item[i].opt[0].id  = tmp_int[11];
+			p->store_item[i].opt[0].val = tmp_int[12];
+			p->store_item[i].opt[1].id  = tmp_int[13];
+			p->store_item[i].opt[1].val = tmp_int[14];
+			p->store_item[i].opt[2].id  = tmp_int[15];
+			p->store_item[i].opt[2].val = tmp_int[16];
+			p->store_item[i].opt[3].id  = tmp_int[17];
+			p->store_item[i].opt[3].val = tmp_int[18];
+			p->store_item[i].opt[4].id  = tmp_int[19];
+			p->store_item[i].opt[4].val = tmp_int[20];
+			p->store_item[i].limit      = (unsigned int)tmp_int[21];
+			p->store_item[i].private_   = tmp_int[22];
+		}
+		next += len;
+		if(str[next] == ' ')
+			next++;
+	}
+	return 0;
+}
+
+/*==========================================
+ * アカウントIDからサブ2倉庫データをロード
+ * （新規倉庫追加可能）
+ *------------------------------------------
+ */
+const struct s2_storage* s2_storagedb_txt_load(int account_id)
+{
+	struct s2_storage *s = (struct s2_storage *)numdb_search(s2_storage_db, account_id);
+
+	if(s == NULL) {
+		s = (struct s2_storage *)aCalloc(1, sizeof(struct s2_storage));
+		s->account_id = account_id;
+		numdb_insert(s2_storage_db, s->account_id, s);
+	}
+	return s;
+}
+
+/*==========================================
+ * サブ2倉庫データのセーブ
+ *------------------------------------------
+ */
+bool s2_storagedb_txt_save(struct s2_storage *s2)
+{
+	struct s2_storage *s1;
+
+	nullpo_retr(false, s2);
+
+	s1 = (struct s2_storage *)numdb_search(s2_storage_db, s2->account_id);
+	if(s1 == NULL) {
+		s1 = (struct s2_storage *)aCalloc(1, sizeof(struct s2_storage));
+		s1->account_id = s2->account_id;
+		numdb_insert(s2_storage_db, s2->account_id, s1);
+	}
+	memcpy(s1, s2, sizeof(struct s2_storage));
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+		journal_write( &storage_journal, s1->account_id, s1 );
+#endif
+	return true;
+}
+
+/*==========================================
+ * サブ2倉庫データの同期
+ *------------------------------------------
+ */
+static int s2_storagedb_txt_sync_sub(void *key, void *data, va_list ap)
+{
+	char line[65536];
+	FILE *fp;
+
+	s2_storage_tostr(line, (struct s2_storage *)data);
+	fp = va_arg(ap, FILE *);
+	if(*line)
+		fprintf(fp, "%s" NEWLINE, line);
+
+	return 0;
+}
+
+int s2_storagedb_txt_sync(void)
+{
+	FILE *fp;
+	int lock;
+
+	if( !s2_storage_db )
+		return 1;
+
+	if( (fp = lock_fopen(s2_storage_txt, &lock)) == NULL ) {
+		printf("storagedb_txt_sync: can't write [%s] !!! data is lost !!!\n", s2_storage_txt);
+		return 1;
+	}
+	numdb_foreach(s2_storage_db, s2_storagedb_txt_sync_sub, fp);
+	lock_fclose(fp, s2_storage_txt, &lock);
+
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+	{
+		// コミットしたのでジャーナルを新規作成する
+		journal_final( &storage_journal );
+		journal_create( &storage_journal, sizeof(struct s2_storage), storage_journal_cache, storage_journal_file );
+	}
+#endif
+	return 0;
+}
+
+/*==========================================
+ * サブ2倉庫データ削除
+ *------------------------------------------
+ */
+bool s2_storagedb_txt_delete(int account_id)
+{
+	struct s2_storage *s = (struct s2_storage *)numdb_search(s2_storage_db, account_id);
+
+	if(s) {
+		int i;
+		for(i = 0; i < s->storage_amount; i++) {
+			// ペット削除
+			if(s->store_item[i].card[0] == (int)0xff00)
+				petdb_delete(*((int *)(&s->store_item[i].card[1])));
+		}
+		numdb_erase(s2_storage_db, account_id);
+		aFree(s);
+#ifdef TXT_JOURNAL
+		if( storage_journal_enable )
+			journal_write( &storage_journal, account_id, NULL );
+#endif
+	}
+	return true;
+}
+
+/*==========================================
+ * サブ3倉庫データを文字列へ変換
+ *------------------------------------------
+ */
+static int s3_storage_tostr(char *str, struct s3_storage *p)
+{
+	int i, f = 0;
+	char *str_p = str;
+
+	nullpo_retr(1, p);
+
+	str_p += snprintf(str_p, 65536 - (size_t)(str_p - str), "%d,%d\t", p->account_id, p->storage_amount);
+
+	for(i = 0; i < MAX_STORAGE; i++) {
+		if(p->store_item[i].nameid && p->store_item[i].amount) {
+			str_p += snprintf(str_p, 65536 - (size_t)(str_p - str), "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%u,%d ",
+				p->store_item[i].id,p->store_item[i].nameid,p->store_item[i].amount,p->store_item[i].equip,
+				p->store_item[i].identify,p->store_item[i].refine,p->store_item[i].attribute,
+				p->store_item[i].card[0],p->store_item[i].card[1],p->store_item[i].card[2],p->store_item[i].card[3],
+				p->store_item[i].opt[0].id,p->store_item[i].opt[0].val,p->store_item[i].opt[1].id,p->store_item[i].opt[1].val,p->store_item[i].opt[2].id,p->store_item[i].opt[2].val,
+				p->store_item[i].opt[3].id,p->store_item[i].opt[3].val,p->store_item[i].opt[4].id,p->store_item[i].opt[4].val,
+				p->store_item[i].limit,p->store_item[i].private_);
+			f++;
+		}
+	}
+	*(str_p++) = '\t';
+
+	*str_p = '\0';
+	if(!f)
+		str[0] = 0;
+
+	return 0;
+}
+
+/*==========================================
+ * サブ3倉庫データを文字列から変換
+ *------------------------------------------
+ */
+static int s3_storage_fromstr(char *str, struct s3_storage *p)
+{
+	int tmp_int[23];
+	int set, next, len, i;
+
+	nullpo_retr(1, p);
+
+	set = sscanf(str, "%d,%d%n", &tmp_int[0], &tmp_int[1], &next);
+	p->storage_amount = tmp_int[1];
+
+	if(set != 2)
+		return 1;
+	if(str[next] == '\n' || str[next] == '\r')
+		return 0;
+	next++;
+	for(i = 0; str[next] && str[next] != '\t'; i++){
+		// Auriga-1369以降の形式
+		set = sscanf(str + next, "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%u,%d%n",
+			&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
+			&tmp_int[4],&tmp_int[5],&tmp_int[6],
+			&tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],
+			&tmp_int[11],&tmp_int[12],&tmp_int[13],&tmp_int[14],&tmp_int[15],&tmp_int[16],
+			&tmp_int[17],&tmp_int[18],&tmp_int[19],&tmp_int[20],
+			&tmp_int[21],&tmp_int[22],&len);
+
+		if(set != 23)
+		{
+			// Auriga-0300以降の形式
+			tmp_int[11] = 0;	// opt[0].id
+			tmp_int[12] = 0;	// opt[0].val
+			tmp_int[13] = 0;	// opt[1].id
+			tmp_int[14] = 0;	// opt[1].val
+			tmp_int[15] = 0;	// opt[2].id
+			tmp_int[16] = 0;	// opt[2].val
+			tmp_int[17] = 0;	// opt[3].id
+			tmp_int[18] = 0;	// opt[3].val
+			tmp_int[19] = 0;	// opt[4].id
+			tmp_int[20] = 0;	// opt[4].val
+			tmp_int[22] = 0;	// private
+			set = sscanf(str + next, "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%u%n",
+				&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
+				&tmp_int[4],&tmp_int[5],&tmp_int[6],
+				&tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],
+				&tmp_int[21],&len);
+			if(set != 12) {
+				tmp_int[21] = 0;	// limit
+				set = sscanf(str + next, "%u,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d%n",
+					&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
+					&tmp_int[4],&tmp_int[5],&tmp_int[6],
+					&tmp_int[7],&tmp_int[8],&tmp_int[9],&tmp_int[10],&len);
+				if(set != 11)
+					return 1;
+			}
+		}
+		if(i < MAX_STORAGE) {
+			p->store_item[i].id         = (unsigned int)tmp_int[0];
+			p->store_item[i].nameid     = tmp_int[1];
+			p->store_item[i].amount     = tmp_int[2];
+			p->store_item[i].equip      = (unsigned int)tmp_int[3];
+			p->store_item[i].identify   = tmp_int[4];
+			p->store_item[i].refine     = tmp_int[5];
+			p->store_item[i].attribute  = tmp_int[6];
+			p->store_item[i].card[0]    = tmp_int[7];
+			p->store_item[i].card[1]    = tmp_int[8];
+			p->store_item[i].card[2]    = tmp_int[9];
+			p->store_item[i].card[3]    = tmp_int[10];
+			p->store_item[i].opt[0].id  = tmp_int[11];
+			p->store_item[i].opt[0].val = tmp_int[12];
+			p->store_item[i].opt[1].id  = tmp_int[13];
+			p->store_item[i].opt[1].val = tmp_int[14];
+			p->store_item[i].opt[2].id  = tmp_int[15];
+			p->store_item[i].opt[2].val = tmp_int[16];
+			p->store_item[i].opt[3].id  = tmp_int[17];
+			p->store_item[i].opt[3].val = tmp_int[18];
+			p->store_item[i].opt[4].id  = tmp_int[19];
+			p->store_item[i].opt[4].val = tmp_int[20];
+			p->store_item[i].limit      = (unsigned int)tmp_int[21];
+			p->store_item[i].private_   = tmp_int[22];
+		}
+		next += len;
+		if(str[next] == ' ')
+			next++;
+	}
+	return 0;
+}
+
+/*==========================================
+ * アカウントIDからサブ3倉庫データをロード
+ * （新規倉庫追加可能）
+ *------------------------------------------
+ */
+const struct s3_storage* s3_storagedb_txt_load(int account_id)
+{
+	struct s3_storage *s = (struct s3_storage *)numdb_search(s3_storage_db, account_id);
+
+	if(s == NULL) {
+		s = (struct s3_storage *)aCalloc(1, sizeof(struct s3_storage));
+		s->account_id = account_id;
+		numdb_insert(s3_storage_db, s->account_id, s);
+	}
+	return s;
+}
+
+/*==========================================
+ * サブ3倉庫データのセーブ
+ *------------------------------------------
+ */
+bool s3_storagedb_txt_save(struct s3_storage *s2)
+{
+	struct s3_storage *s1;
+
+	nullpo_retr(false, s2);
+
+	s1 = (struct s3_storage *)numdb_search(s3_storage_db, s2->account_id);
+	if(s1 == NULL) {
+		s1 = (struct s3_storage *)aCalloc(1, sizeof(struct s3_storage));
+		s1->account_id = s2->account_id;
+		numdb_insert(s3_storage_db, s2->account_id, s1);
+	}
+	memcpy(s1, s2, sizeof(struct s3_storage));
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+		journal_write( &storage_journal, s1->account_id, s1 );
+#endif
+	return true;
+}
+
+/*==========================================
+ * サブ3倉庫データの同期
+ *------------------------------------------
+ */
+static int s3_storagedb_txt_sync_sub(void *key, void *data, va_list ap)
+{
+	char line[65536];
+	FILE *fp;
+
+	s3_storage_tostr(line, (struct s3_storage *)data);
+	fp = va_arg(ap, FILE *);
+	if(*line)
+		fprintf(fp, "%s" NEWLINE, line);
+
+	return 0;
+}
+
+int s3_storagedb_txt_sync(void)
+{
+	FILE *fp;
+	int lock;
+
+	if( !s3_storage_db )
+		return 1;
+
+	if( (fp = lock_fopen(s3_storage_txt, &lock)) == NULL ) {
+		printf("storagedb_txt_sync: can't write [%s] !!! data is lost !!!\n", s3_storage_txt);
+		return 1;
+	}
+	numdb_foreach(s3_storage_db, s3_storagedb_txt_sync_sub, fp);
+	lock_fclose(fp, s3_storage_txt, &lock);
+
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+	{
+		// コミットしたのでジャーナルを新規作成する
+		journal_final( &storage_journal );
+		journal_create( &storage_journal, sizeof(struct s3_storage), storage_journal_cache, storage_journal_file );
+	}
+#endif
+	return 0;
+}
+
+/*==========================================
+ * サブ3倉庫データ削除
+ *------------------------------------------
+ */
+bool s3_storagedb_txt_delete(int account_id)
+{
+	struct s3_storage *s = (struct s3_storage *)numdb_search(s3_storage_db, account_id);
+
+	if(s) {
+		int i;
+		for(i = 0; i < s->storage_amount; i++) {
+			// ペット削除
+			if(s->store_item[i].card[0] == (int)0xff00)
+				petdb_delete(*((int *)(&s->store_item[i].card[1])));
+		}
+		numdb_erase(s3_storage_db, account_id);
+		aFree(s);
+#ifdef TXT_JOURNAL
+		if( storage_journal_enable )
+			journal_write( &storage_journal, account_id, NULL );
+#endif
+	}
+	return true;
+}
+
 
 /*==========================================
  * ギルド倉庫データを文字列へ変換
@@ -705,6 +1421,192 @@ static bool storagedb_txt_read(void)
 	return ret;
 }
 
+
+/*==========================================
+ * サブ1倉庫データファイルの読み込み
+ *------------------------------------------
+ */
+static bool s1_storagedb_txt_read(void)
+{
+	FILE *fp;
+	bool ret = true;
+
+	s1_storage_db = numdb_init();
+
+	fp = fopen(s1_storage_txt, "r");
+	if(fp == NULL) {
+		printf("s1_storagedb_txt_read: open [%s] failed !\n", s1_storage_txt);
+		ret = false;
+	} else {
+		int count = 0, tmp_int;
+		char line[65536];
+
+		while(fgets(line, sizeof(line) - 1, fp)) {
+			struct s1_storage *s;
+			if(sscanf(line, "%d", &tmp_int) < 1)
+				continue;
+			s = (struct s1_storage *)aCalloc(1, sizeof(struct s1_storage));
+			s->account_id = tmp_int;
+			if(s->account_id > 0 && s1_storage_fromstr(line, s) == 0) {
+				numdb_insert(s1_storage_db, s->account_id, s);
+			} else {
+				printf("int_storage: broken data [%s] line %d\n", s1_storage_txt, count);
+				aFree(s);
+			}
+			count++;
+		}
+		fclose(fp);
+	}
+
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+	{
+		// ジャーナルデータのロールフォワード
+		if( journal_load( &storage_journal, sizeof(struct s1_storage), storage_journal_file ) )
+		{
+			int c = journal_rollforward( &storage_journal, storage_journal_rollforward );
+
+			printf("int_storage: storage_journal: roll-forward (%d)\n", c );
+
+			// ロールフォワードしたので、txt データを保存する ( journal も新規作成される)
+			storagedb_txt_sync();
+		}
+		else
+		{
+			// ジャーナルを新規作成する
+			journal_final( &storage_journal );
+			journal_create( &storage_journal, sizeof(struct s1_storage), storage_journal_cache, storage_journal_file );
+		}
+	}
+#endif
+
+	return ret;
+}
+
+
+/*==========================================
+ * サブ2倉庫データファイルの読み込み
+ *------------------------------------------
+ */
+static bool s2_storagedb_txt_read(void)
+{
+	FILE *fp;
+	bool ret = true;
+
+	s2_storage_db = numdb_init();
+
+	fp = fopen(s2_storage_txt, "r");
+	if(fp == NULL) {
+		printf("s2_storagedb_txt_read: open [%s] failed !\n", s2_storage_txt);
+		ret = false;
+	} else {
+		int count = 0, tmp_int;
+		char line[65536];
+
+		while(fgets(line, sizeof(line) - 1, fp)) {
+			struct s2_storage *s;
+			if(sscanf(line, "%d", &tmp_int) < 1)
+				continue;
+			s = (struct s2_storage *)aCalloc(1, sizeof(struct s2_storage));
+			s->account_id = tmp_int;
+			if(s->account_id > 0 && s2_storage_fromstr(line, s) == 0) {
+				numdb_insert(s2_storage_db, s->account_id, s);
+			} else {
+				printf("int_storage: broken data [%s] line %d\n", s2_storage_txt, count);
+				aFree(s);
+			}
+			count++;
+		}
+		fclose(fp);
+	}
+
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+	{
+		// ジャーナルデータのロールフォワード
+		if( journal_load( &storage_journal, sizeof(struct s2_storage), storage_journal_file ) )
+		{
+			int c = journal_rollforward( &storage_journal, storage_journal_rollforward );
+
+			printf("int_storage: storage_journal: roll-forward (%d)\n", c );
+
+			// ロールフォワードしたので、txt データを保存する ( journal も新規作成される)
+			storagedb_txt_sync();
+		}
+		else
+		{
+			// ジャーナルを新規作成する
+			journal_final( &storage_journal );
+			journal_create( &storage_journal, sizeof(struct s2_storage), storage_journal_cache, storage_journal_file );
+		}
+	}
+#endif
+
+	return ret;
+}
+
+/*==========================================
+ * サブ3倉庫データファイルの読み込み
+ *------------------------------------------
+ */
+static bool s3_storagedb_txt_read(void)
+{
+	FILE *fp;
+	bool ret = true;
+
+	s3_storage_db = numdb_init();
+
+	fp = fopen(s3_storage_txt, "r");
+	if(fp == NULL) {
+		printf("s3_storagedb_txt_read: open [%s] failed !\n", s3_storage_txt);
+		ret = false;
+	} else {
+		int count = 0, tmp_int;
+		char line[65536];
+
+		while(fgets(line, sizeof(line) - 1, fp)) {
+			struct s3_storage *s;
+			if(sscanf(line, "%d", &tmp_int) < 1)
+				continue;
+			s = (struct s3_storage *)aCalloc(1, sizeof(struct s3_storage));
+			s->account_id = tmp_int;
+			if(s->account_id > 0 && s3_storage_fromstr(line, s) == 0) {
+				numdb_insert(s3_storage_db, s->account_id, s);
+			} else {
+				printf("int_storage: broken data [%s] line %d\n", s3_storage_txt, count);
+				aFree(s);
+			}
+			count++;
+		}
+		fclose(fp);
+	}
+
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+	{
+		// ジャーナルデータのロールフォワード
+		if( journal_load( &storage_journal, sizeof(struct s3_storage), storage_journal_file ) )
+		{
+			int c = journal_rollforward( &storage_journal, storage_journal_rollforward );
+
+			printf("int_storage: storage_journal: roll-forward (%d)\n", c );
+
+			// ロールフォワードしたので、txt データを保存する ( journal も新規作成される)
+			storagedb_txt_sync();
+		}
+		else
+		{
+			// ジャーナルを新規作成する
+			journal_final( &storage_journal );
+			journal_create( &storage_journal, sizeof(struct s3_storage), storage_journal_cache, storage_journal_file );
+		}
+	}
+#endif
+
+	return ret;
+}
+
+
 /*==========================================
  * ギルド倉庫データファイルの読み込み
  *------------------------------------------
@@ -795,6 +1697,85 @@ void storagedb_txt_final(void)
 }
 
 /*==========================================
+ * サブ1倉庫データの終了
+ *------------------------------------------
+ */
+static int s1_storage_db_final(void *key, void *data, va_list ap)
+{
+	struct s1_storage *s = (struct s1_storage *)data;
+
+	aFree(s);
+
+	return 0;
+}
+
+void s1_storagedb_txt_final(void)
+{
+	if(s1_storage_db)
+		numdb_final(s1_storage_db, s1_storage_db_final);
+
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+	{
+		journal_final( &storage_journal );
+	}
+#endif
+}
+
+/*==========================================
+ * サブ2倉庫データの終了
+ *------------------------------------------
+ */
+static int s2_storage_db_final(void *key, void *data, va_list ap)
+{
+	struct s2_storage *s = (struct s2_storage *)data;
+
+	aFree(s);
+
+	return 0;
+}
+
+void s2_storagedb_txt_final(void)
+{
+	if(s2_storage_db)
+		numdb_final(s2_storage_db, s2_storage_db_final);
+
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+	{
+		journal_final( &storage_journal );
+	}
+#endif
+}
+
+/*==========================================
+ * サブ3倉庫データの終了
+ *------------------------------------------
+ */
+static int s3_storage_db_final(void *key, void *data, va_list ap)
+{
+	struct s3_storage *s = (struct s3_storage *)data;
+
+	aFree(s);
+
+	return 0;
+}
+
+void s3_storagedb_txt_final(void)
+{
+	if(s3_storage_db)
+		numdb_final(s3_storage_db, s3_storage_db_final);
+
+#ifdef TXT_JOURNAL
+	if( storage_journal_enable )
+	{
+		journal_final( &storage_journal );
+	}
+#endif
+}
+
+
+/*==========================================
  * ギルド倉庫データの終了
  *------------------------------------------
  */
@@ -829,6 +1810,9 @@ bool storagedb_txt_init(void)
 	bool result = false;
 
 	result = storagedb_txt_read();
+    result = s1_storagedb_txt_read() && result? true: false;
+    result = s2_storagedb_txt_read() && result? true: false;
+    result = s3_storagedb_txt_read() && result? true: false;
 
 	return (gstoragedb_txt_read() && result)? true: false;
 }

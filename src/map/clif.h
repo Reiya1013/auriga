@@ -281,6 +281,23 @@ void clif_guildstorageitemadded(struct map_session_data *sd, struct guild_storag
 void clif_inventoryStart(struct map_session_data *sd, int type, const char *name);
 void clif_inventoryEnd(struct map_session_data *sd, int type);
 
+// s storage
+void clif_s1_storageitemlist(struct map_session_data *sd, struct s1_storage *stor);
+void clif_s1_storageequiplist(struct map_session_data *sd, struct s1_storage *stor);
+void clif_update_s1_storageamount(struct map_session_data *sd, struct s1_storage *stor);
+void clif_s1_storageitemadded(struct map_session_data *sd, struct s1_storage *stor, int idx, int amount);
+
+void clif_s2_storageitemlist(struct map_session_data *sd, struct s2_storage *stor);
+void clif_s2_storageequiplist(struct map_session_data *sd, struct s2_storage *stor);
+void clif_update_s2_storageamount(struct map_session_data *sd, struct s2_storage *stor);
+void clif_s2_storageitemadded(struct map_session_data *sd, struct s2_storage *stor, int idx, int amount);
+
+void clif_s3_storageitemlist(struct map_session_data *sd, struct s3_storage *stor);
+void clif_s3_storageequiplist(struct map_session_data *sd, struct s3_storage *stor);
+void clif_update_s3_storageamount(struct map_session_data *sd, struct s3_storage *stor);
+void clif_s3_storageitemadded(struct map_session_data *sd, struct s3_storage *stor, int idx, int amount);
+
+
 int clif_pcinsight(struct block_list *bl, va_list ap);
 int clif_pcoutsight(struct block_list *bl, va_list ap);
 int clif_mobinsight(struct block_list *bl, va_list ap);

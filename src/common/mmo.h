@@ -794,6 +794,33 @@ struct storage {
 	struct item store_item[MAX_STORAGE];
 };
 
+struct s1_storage {
+	int account_id;
+	char dirty;
+	char storage_status;
+	short storage_amount;
+	unsigned int sortkey;
+	struct item store_item[MAX_STORAGE];
+};
+
+struct s2_storage {
+	int account_id;
+	char dirty;
+	char storage_status;
+	short storage_amount;
+	unsigned int sortkey;
+	struct item store_item[MAX_STORAGE];
+};
+
+struct s3_storage {
+	int account_id;
+	char dirty;
+	char storage_status;
+	short storage_amount;
+	unsigned int sortkey;
+	struct item store_item[MAX_STORAGE];
+};
+
 struct guild_storage {
 	int guild_id;
 	char dirty;

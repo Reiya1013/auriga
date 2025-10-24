@@ -1104,6 +1104,21 @@ AurigaNPCScript
 
 			倉庫を開きます。
 
+		open_s1_storage命令
+			open_s1_storage;
+
+			サブ倉庫1を開きます。
+
+		open_s2_storage命令
+			open_s2_storage;
+
+			サブ倉庫2を開きます。
+
+		open_s3_storage命令
+			open_s3_storage;
+
+			サブ倉庫3を開きます。
+
 		setcart命令
 			setcart;
 

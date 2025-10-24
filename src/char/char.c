@@ -2726,6 +2726,9 @@ int parse_tologin(int fd)
 				}
 				// ëqå…ÇÃçÌèú
 				storagedb_delete(RFIFOL(fd,2));
+				s1_storagedb_delete(RFIFOL(fd,2));
+				s2_storagedb_delete(RFIFOL(fd,2));
+				s3_storagedb_delete(RFIFOL(fd,2));
 				RFIFOSKIP(fd,6);
 			}
 			break;
@@ -4876,6 +4879,9 @@ void do_final(void)
 	guilddb_final();
 	partydb_final();
 	storagedb_final();
+	s1_storagedb_final();
+	s2_storagedb_final();
+	s3_storagedb_final();
 	gstoragedb_final();
 	maildb_final();
 	statusdb_final();

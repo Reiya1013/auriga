@@ -60,7 +60,7 @@
 
 static const int packet_len_table[]={
 	-1,-1,51, 0, -1, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,	// 3800-
-	-1, 7, 0, 0,  0, 0, 0, 0, -1,11,15, 7,  6, 0,  0, 0,	// 3810-
+	-1, 7,-1, 7, -1, 7,-1, 7, -1,11,15, 7,  6, 0,  0, 0,	// 3810-
 	35,-1,39,13, 38,35, 7,-1, 14, 0, 0, 0,  0, 0,  0, 0,	// 3820-
 	10,-1,15, 0, 79,19, 7,-1,  0,-1,-1,-1, 15,67,186,-1,	// 3830-
 	 9, 9,-1,-1,  0, 0, 0, 0,  7,-1,-1,-1, 11,-1, -1, 0,	// 3840-
@@ -446,6 +446,46 @@ int intif_request_storage(int account_id)
 	return 0;
 }
 
+// サブ１倉庫データ要求
+int intif_request_s1_storage(int account_id)
+{
+	if (inter_fd < 0)
+		return -1;
+
+	WFIFOW(inter_fd,0) = 0x3012; 
+	WFIFOL(inter_fd,2) = account_id;
+	WFIFOSET(inter_fd,6);
+
+	return 0;
+}
+
+// サブ2倉庫データ要求
+int intif_request_s2_storage(int account_id)
+{
+	if (inter_fd < 0)
+		return -1;
+
+	WFIFOW(inter_fd,0) = 0x3014; 
+	WFIFOL(inter_fd,2) = account_id;
+	WFIFOSET(inter_fd,6);
+
+	return 0;
+}
+
+// サブ3倉庫データ要求
+int intif_request_s3_storage(int account_id)
+{
+	if (inter_fd < 0)
+		return -1;
+
+	WFIFOW(inter_fd,0) = 0x3016;  
+	WFIFOL(inter_fd,2) = account_id;
+	WFIFOSET(inter_fd,6);
+
+	return 0;
+}
+
+
 // 倉庫データ送信
 int intif_send_storage(struct storage *stor)
 {
@@ -462,6 +502,58 @@ int intif_send_storage(struct storage *stor)
 
 	return 0;
 }
+
+// サブ1倉庫データ送信
+int intif_send_s1_storage(struct s1_storage *stor)
+{
+	nullpo_retr(0, stor);
+
+	if (inter_fd < 0)
+		return -1;
+
+	WFIFOW(inter_fd,0) = 0x3013; 
+	WFIFOW(inter_fd,2) = sizeof(struct s1_storage)+8;
+	WFIFOL(inter_fd,4) = stor->account_id;
+	memcpy( WFIFOP(inter_fd,8),stor, sizeof(struct s1_storage) );
+	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
+
+	return 0;
+}
+
+// サブ2倉庫データ送信
+int intif_send_s2_storage(struct s2_storage *stor)
+{
+	nullpo_retr(0, stor);
+
+	if (inter_fd < 0)
+		return -1;
+
+	WFIFOW(inter_fd,0) = 0x3015; 
+	WFIFOW(inter_fd,2) = sizeof(struct s2_storage)+8;
+	WFIFOL(inter_fd,4) = stor->account_id;
+	memcpy( WFIFOP(inter_fd,8),stor, sizeof(struct s2_storage) );
+	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
+
+	return 0;
+}
+
+// サブ3倉庫データ送信
+int intif_send_s3_storage(struct s3_storage *stor)
+{
+	nullpo_retr(0, stor);
+
+	if (inter_fd < 0)
+		return -1;
+
+	WFIFOW(inter_fd,0) = 0x3017; 
+	WFIFOW(inter_fd,2) = sizeof(struct s3_storage)+8;
+	WFIFOL(inter_fd,4) = stor->account_id;
+	memcpy( WFIFOP(inter_fd,8),stor, sizeof(struct s3_storage) );
+	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
+
+	return 0;
+}
+
 
 // ギルド倉庫データ要求
 int intif_request_guild_storage(int account_id,int guild_id)
@@ -1506,6 +1598,67 @@ static int intif_parse_SaveStorage(int fd)
 	return 0;
 }
 
+// サブ1倉庫データ受信
+static int intif_parse_Load_s1_Storage(int fd)
+{
+	if(RFIFOW(fd,2)-8 != sizeof(struct s1_storage)) {
+		if(battle_config.error_log)
+			printf("intif_parse_Load_s1_Storage: data size error %d %lu\n", RFIFOW(fd,2)-8, (unsigned long)sizeof(struct s1_storage));
+		return 1;
+	}
+
+	return s1_storage_storageload(RFIFOL(fd,4), (struct s1_storage *)RFIFOP(fd,8));
+}
+
+// サブ1倉庫データ送信成功
+static int intif_parse_Save_s1_Storage(int fd)
+{
+	if(battle_config.save_log)
+		printf("intif_save_s1_storage: done %d %d\n",RFIFOL(fd,2),RFIFOB(fd,6) );
+	return 0;
+}
+
+// サブ2倉庫データ受信
+static int intif_parse_Load_s2_Storage(int fd)
+{
+	if(RFIFOW(fd,2)-8 != sizeof(struct s2_storage)) {
+		if(battle_config.error_log)
+			printf("intif_parse_Load_s2_Storage: data size error %d %lu\n", RFIFOW(fd,2)-8, (unsigned long)sizeof(struct s2_storage));
+		return 1;
+	}
+
+	return s2_storage_storageload(RFIFOL(fd,4), (struct s2_storage *)RFIFOP(fd,8));
+}
+
+// サブ2倉庫データ送信成功
+static int intif_parse_Save_s2_Storage(int fd)
+{
+	if(battle_config.save_log)
+		printf("intif_save_s2_storage: done %d %d\n",RFIFOL(fd,2),RFIFOB(fd,6) );
+	return 0;
+}
+
+// サブ3倉庫データ受信
+static int intif_parse_Load_s3_Storage(int fd)
+{
+	if(RFIFOW(fd,2)-8 != sizeof(struct s3_storage)) {
+		if(battle_config.error_log)
+			printf("intif_parse_Load_s3_Storage: data size error %d %lu\n", RFIFOW(fd,2)-8, (unsigned long)sizeof(struct s3_storage));
+		return 1;
+	}
+
+	return s3_storage_storageload(RFIFOL(fd,4), (struct s3_storage *)RFIFOP(fd,8));
+}
+
+// サブ3倉庫データ送信成功
+static int intif_parse_Save_s3_Storage(int fd)
+{
+	if(battle_config.save_log)
+		printf("intif_save_s3_storage: done %d %d\n",RFIFOL(fd,2),RFIFOB(fd,6) );
+	return 0;
+}
+
+
 // ギルド倉庫データ受信
 static int intif_parse_LoadGuildStorage(int fd)
 {
@@ -2361,6 +2514,12 @@ int intif_parse(int fd)
 	case 0x3804: intif_parse_AccountReg(fd); break;
 	case 0x3810: intif_parse_LoadStorage(fd); break;
 	case 0x3811: intif_parse_SaveStorage(fd); break;
+	case 0x3812: intif_parse_Load_s1_Storage(fd); break;
+	case 0x3813: intif_parse_Save_s1_Storage(fd); break;
+	case 0x3814: intif_parse_Load_s2_Storage(fd); break;
+	case 0x3815: intif_parse_Save_s2_Storage(fd); break;
+	case 0x3816: intif_parse_Load_s3_Storage(fd); break;
+	case 0x3817: intif_parse_Save_s3_Storage(fd); break;
 	case 0x3818: intif_parse_LoadGuildStorage(fd); break;
 	case 0x3819: intif_parse_SaveGuildStorage(fd); break;
 	case 0x381a: intif_parse_TrylockGuildStorageAck(fd); break;

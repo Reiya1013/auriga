@@ -48,7 +48,26 @@ void gstoragedb_sql_final(void);
 #define storagedb_final  storagedb_sql_final
 #define storagedb_config_read_sub storagedb_sql_config_read_sub
 
-#define gstoragedb_load   gstoragedb_sql_load
+
+#define s1_storagedb_load   storagedb_sql_load
+#define s1_storagedb_save   storagedb_sql_save
+#define s1_storagedb_sync   storagedb_sql_sync
+#define s1_storagedb_delete storagedb_sql_delete
+#define s1_storagedb_final  storagedb_sql_final
+
+#define s2_storagedb_load   storagedb_sql_load
+#define s2_storagedb_save   storagedb_sql_save
+#define s2_storagedb_sync   storagedb_sql_sync
+#define s2_storagedb_delete storagedb_sql_delete
+#define s2_storagedb_final  storagedb_sql_final
+
+#define s3_storagedb_load   storagedb_sql_load
+#define s3_storagedb_save   storagedb_sql_save
+#define s3_storagedb_sync   storagedb_sql_sync
+#define s3_storagedb_delete storagedb_sql_delete
+#define s3_storagedb_final  storagedb_sql_final
+
+#define gstoragedb_load   storagedb_sql_load
 #define gstoragedb_save   gstoragedb_sql_save
 #define gstoragedb_sync   gstoragedb_sql_sync
 #define gstoragedb_delete gstoragedb_sql_delete

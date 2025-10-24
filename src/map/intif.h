@@ -44,6 +44,14 @@ int intif_trylock_guild_storage(struct map_session_data *sd,int npc_id);
 int intif_unlock_guild_storage(int guild_id);
 int intif_deadlock_guild_storage(int guild_id);
 
+// サブ倉庫関連
+int intif_request_s1_storage(int account_id);
+int intif_request_s2_storage(int account_id);
+int intif_request_s3_storage(int account_id);
+int intif_send_s1_storage(struct s1_storage *stor);
+int intif_send_s2_storage(struct s2_storage *stor);
+int intif_send_s3_storage(struct s3_storage *stor);
+
 // パーティー関連
 void intif_create_party(struct map_session_data *sd, const char *name, int item, int item2);
 int intif_request_partyinfo(int party_id);

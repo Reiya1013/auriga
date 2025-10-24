@@ -37,6 +37,9 @@
 #include "msg.h"
 
 static struct dbt *storage_db;
+static struct dbt *s1_storage_db;
+static struct dbt *s2_storage_db;
+static struct dbt *s3_storage_db;
 static struct dbt *guild_storage_db;
 
 /*==========================================
@@ -196,6 +199,15 @@ int storage_storageopen(struct map_session_data *sd)
 		stor->storage_status = 1;
 	}
 
+	if(sd->state.storage_flag == 3)
+		s1_storage_storageclose(sd); // サブ1カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 4)
+		s2_storage_storageclose(sd); // サブ2カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 5)
+		s3_storage_storageclose(sd); // サブ3カプラ倉庫をすでに開いている場合閉じる
+
 	if(sd->state.storage_flag == 2)
 		storage_guild_storageclose(sd); // ギルド倉庫をすでに開いている場合閉じる
 
@@ -236,6 +248,15 @@ int storage_storageload(int account_id, struct storage *s)
 		return 0;
 	if(sd->state.storage_flag == 2)
 		storage_guild_storageclose(sd);
+	if(sd->state.storage_flag == 3)
+		s1_storage_storageclose(sd); // サブ1カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 4)
+		s2_storage_storageclose(sd); // サブ2カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 5)
+		s3_storage_storageclose(sd); // サブ3カプラ倉庫をすでに開いている場合閉じる
+
 
 	stor = account2storage(account_id);
 
@@ -548,6 +569,16 @@ int storage_guild_storageopen(struct map_session_data *sd)
 	if(sd->state.storage_flag == 1)
 		storage_storageclose(sd); // カプラ倉庫をすでに開いている場合閉じる
 
+	if(sd->state.storage_flag == 3)
+		s1_storage_storageclose(sd); // サブ1カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 4)
+		s2_storage_storageclose(sd); // サブ2カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 5)
+		s3_storage_storageclose(sd); // サブ3カプラ倉庫をすでに開いている場合閉じる
+
+
 	if((gstor = (struct guild_storage *)numdb_search(guild_storage_db,sd->status.guild_id)) != NULL) {
 		gstor->storage_status  = 1;
 		sd->state.storage_flag = 2;
@@ -590,6 +621,13 @@ int storage_guild_storageload(int account_id, int guild_id, struct guild_storage
 		return 0;
 	if(sd->state.storage_flag == 1)
 		storage_storageclose(sd);
+	if(sd->state.storage_flag == 3)
+		s1_storage_storageclose(sd); // サブ1カプラ倉庫をすでに開いている場合閉じる
+	if(sd->state.storage_flag == 4)
+		s2_storage_storageclose(sd); // サブ2カプラ倉庫をすでに開いている場合閉じる
+	if(sd->state.storage_flag == 5)
+		s3_storage_storageclose(sd); // サブ3カプラ倉庫をすでに開いている場合閉じる
+
 
 	gstor = guild2storage(guild_id);
 	if(!gstor) {
@@ -811,6 +849,7 @@ void storage_guild_storagegettocart(struct map_session_data *sd, int idx, int am
  */
 void storage_guild_storageclose(struct map_session_data *sd)
 {
+	printf("storage_guild_storageclose: %d\n", sd->status.account_id);
 	struct guild_storage *stor;
 
 	nullpo_retv(sd);
@@ -882,6 +921,1193 @@ int storage_guild_checklock(int guild_id)
 	return 1;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*==========================================
+ * サブ１カプラ倉庫データベース
+ *------------------------------------------
+ */
+static struct s1_storage *account2s1storage(int account_id)
+{
+	struct s1_storage *stor;
+
+	stor = (struct s1_storage *)numdb_search(s1_storage_db,account_id);
+	if(stor == NULL) {
+		stor = (struct s1_storage *)aCalloc(1,sizeof(struct s1_storage));
+		stor->account_id = account_id;
+		numdb_insert(s1_storage_db,stor->account_id,stor);
+	}
+	return stor;
+}
+
+/*==========================================
+ * サブ１カプラ倉庫を削除
+ *------------------------------------------
+ */
+void s1_storage_delete(int account_id)
+{
+	struct s1_storage *stor = (struct s1_storage *)numdb_erase(s1_storage_db,account_id);
+
+	if(stor)
+		aFree(stor);
+
+	return;
+}
+
+/*==========================================
+ * サブ１カプラ倉庫を開く
+ *------------------------------------------
+ */
+int s1_storage_storageopen(struct map_session_data *sd)
+{
+	struct s1_storage *stor;
+	int gmlvl = 0;
+
+	nullpo_retr(0, sd);
+
+	if(sd->state.storage_flag == 3)
+		return 0;	// 既にサブ１カプラ倉庫を開いている
+
+	gmlvl = pc_isGM(sd);
+	if(gmlvl > 0 && battle_config.gm_can_drop_lv > gmlvl)
+		return 0;	// 設定しているGMレベルより低い
+
+	if((stor = (struct s1_storage *)numdb_search(s1_storage_db,sd->status.account_id)) != NULL) {
+		if(stor->storage_status)
+			return 1;
+		stor->storage_status = 1;
+	}
+
+	if(sd->state.storage_flag == 1)
+		storage_storageclose(sd); // カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 4)
+		s2_storage_storageclose(sd); // サブ2カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 5)
+		s3_storage_storageclose(sd); // サブ3カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 2)
+		storage_guild_storageclose(sd); // ギルド倉庫をすでに開いている場合閉じる
+
+	if(stor != NULL) {
+		sd->state.storage_flag = 3;
+		clif_inventoryStart(sd, 2, msg_txt(215));
+		clif_s1_storageitemlist(sd,stor);
+		clif_s1_storageequiplist(sd,stor);
+		clif_update_s1_storageamount(sd,stor);
+		clif_inventoryEnd(sd, 2);
+	} else {
+		intif_request_s1_storage(sd->status.account_id);
+	}
+	return 0;
+}
+
+/*==========================================
+ * サブ１カプラ倉庫データの受信
+ *------------------------------------------
+ */
+int s1_storage_storageload(int account_id, struct s1_storage *s)
+{
+	struct map_session_data *sd;
+	struct s1_storage *stor;
+
+	nullpo_retr(1, s);
+
+	sd = map_id2sd(account_id);
+	if(sd == NULL || sd->state.waitingdisconnect) {
+		if(battle_config.error_log && sd == NULL)
+			printf("s1_storage_storageload: user not found %d\n", account_id);
+		s1_storage_delete(account_id);
+		return 1;
+	}
+
+	// 既に倉庫を開いてないかチェック
+	if(sd->state.storage_flag == 3)
+		return 0;
+	if(sd->state.storage_flag == 1)
+		storage_storageclose(sd); // カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 4)
+		s2_storage_storageclose(sd); // サブ2カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 5)
+		s3_storage_storageclose(sd); // サブ3カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 2)
+		storage_guild_storageclose(sd);
+		
+	stor = account2s1storage(account_id);
+
+	if(battle_config.save_log)
+		printf("storageload: %d\n", account_id);
+
+	memcpy(stor, s, sizeof(struct s1_storage));
+	storage_sortitem(stor->store_item, MAX_STORAGE, &stor->sortkey, battle_config.personal_storage_sort);
+	stor->storage_status   = 1;
+	sd->state.storage_flag = 3;
+	clif_inventoryStart(sd, 2, msg_txt(215));
+	clif_s1_storageitemlist(sd,stor);
+	clif_s1_storageequiplist(sd,stor);
+	clif_update_s1_storageamount(sd,stor);
+	clif_inventoryEnd(sd, 2);
+
+	return 0;
+}
+
+/*==========================================
+ * サブ１カプラ倉庫へアイテム追加
+ *------------------------------------------
+ */
+static int s1_storage_additem(struct map_session_data *sd,struct s1_storage *stor,struct item *item_data,int amount)
+{
+	struct item_data *data;
+	int i;
+
+	nullpo_retr(1, sd);
+	nullpo_retr(1, stor);
+	nullpo_retr(1, item_data);
+
+	if(item_data->nameid <= 0 || amount <= 0)
+		return 1;
+
+	nullpo_retr(1, data = itemdb_search(item_data->nameid));
+
+	if(!itemdb_isequip2(data)) {
+		// 装備品ではないので、既所有品なら個数のみ変化させる
+		for(i=0; i<MAX_STORAGE; i++) {
+			if(stor->store_item[i].nameid  == item_data->nameid  &&
+			   stor->store_item[i].card[0] == item_data->card[0] &&
+			   stor->store_item[i].card[1] == item_data->card[1] &&
+			   stor->store_item[i].card[2] == item_data->card[2] &&
+			   stor->store_item[i].card[3] == item_data->card[3] &&
+			   stor->store_item[i].limit   == item_data->limit)
+			{
+				if(stor->store_item[i].amount + amount > MAX_AMOUNT)
+					return 1;
+				stor->store_item[i].amount += amount;
+				stor->dirty = 1;
+				clif_s1_storageitemadded(sd,stor,i,amount);
+				return 0;
+			}
+		}
+	} else if(amount != 1) {
+		return 1;
+	}
+
+	// 装備品か未所有品だったので空き欄へ追加
+	for(i=0; i<MAX_STORAGE; i++) {
+		if(stor->store_item[i].nameid == 0) {
+			memcpy(&stor->store_item[i],item_data,sizeof(stor->store_item[0]));
+			stor->store_item[i].id     = ++stor->sortkey;
+			stor->store_item[i].amount = amount;
+			stor->storage_amount++;
+			stor->dirty = 1;
+			clif_s1_storageitemadded(sd,stor,i,amount);
+			clif_update_s1_storageamount(sd,stor);
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+/*==========================================
+ * サブ１カプラ倉庫からアイテムを減らす
+ *------------------------------------------
+ */
+static void s1_storage_delitem(struct map_session_data *sd,struct s1_storage *stor,int n,int amount)
+{
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	if(stor->store_item[n].nameid == 0 || stor->store_item[n].amount < amount)
+		return;
+
+	stor->store_item[n].amount -= amount;
+	if(stor->store_item[n].amount <= 0) {
+		memset(&stor->store_item[n],0,sizeof(stor->store_item[0]));
+		stor->store_item[n].id = 0;
+		stor->storage_amount--;
+		clif_update_s1_storageamount(sd,stor);
+	}
+	stor->dirty = 1;
+	clif_storageitemremoved(sd,n,amount);
+
+	return;
+}
+
+/*==========================================
+ * サブ１カプラ倉庫へ入れる
+ *------------------------------------------
+ */
+void s1_storage_storageadd(struct map_session_data *sd, int idx, int amount)
+{
+	struct s1_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s1_storage *)numdb_search(s1_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_INVENTORY)
+		return;
+	if(itemdb_isstorageable(sd->status.inventory[idx].nameid) == 0)
+		return;
+	if(amount < 1 || amount > sd->status.inventory[idx].amount)
+		return;
+
+	if(s1_storage_additem(sd, stor, &sd->status.inventory[idx], amount) == 0)
+		pc_delitem(sd, idx, amount, 0, 4);
+
+	return;
+}
+
+/*==========================================
+ * サブ１カプラ倉庫から出す
+ *------------------------------------------
+ */
+void s1_storage_storageget(struct map_session_data *sd, int idx, int amount)
+{
+	struct s1_storage *stor;
+	int flag;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s1_storage *)numdb_search(s1_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_STORAGE)
+		return;
+	if(amount < 1 || amount > stor->store_item[idx].amount)
+		return;
+
+	if((flag = pc_additem(sd, &stor->store_item[idx], amount,false)) == 0) {
+		s1_storage_delitem(sd, stor, idx, amount);
+		return;
+	}
+	clif_storageitemremoved(sd,idx,amount);
+	clif_additem(sd,0,0,flag);
+	clif_s1_storageitemadded(sd,stor,idx,amount);
+
+	return;
+}
+
+/*==========================================
+ * サブ１カプラ倉庫へカートから入れる
+ *------------------------------------------
+ */
+void s1_storage_storageaddfromcart(struct map_session_data *sd, int idx, int amount)
+{
+	struct s1_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s1_storage *)numdb_search(s1_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_CART)
+		return;
+	if(itemdb_isstorageable(sd->status.cart[idx].nameid) == 0)
+		return;
+	if(amount < 1 || amount > sd->status.cart[idx].amount)
+		return;
+
+	if(s1_storage_additem(sd, stor, &sd->status.cart[idx], amount) == 0)
+		pc_cart_delitem(sd, idx, amount, 0);
+
+	return;
+}
+
+/*==========================================
+ * サブ１カプラ倉庫からカートへ出す
+ *------------------------------------------
+ */
+void s1_storage_storagegettocart(struct map_session_data *sd, int idx, int amount)
+{
+	struct s1_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s1_storage *)numdb_search(s1_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_STORAGE)
+		return;
+	if(itemdb_iscartable(stor->store_item[idx].nameid) == 0)	// カートへ出せるかチェック
+		return;
+	if(amount < 1 || amount > stor->store_item[idx].amount)
+		return;
+
+	if(pc_cart_additem(sd, &stor->store_item[idx], amount) == 0)
+		s1_storage_delitem(sd, stor, idx, amount);
+
+	return;
+}
+
+/*==========================================
+ * サブ１カプラ倉庫を閉じて保存
+ *------------------------------------------
+ */
+void s1_storage_storageclose(struct map_session_data *sd)
+{
+	struct s1_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s1_storage *)numdb_search(s1_storage_db,sd->status.account_id));
+
+	if(stor->dirty) {
+		storage_sortitem(stor->store_item, MAX_STORAGE, &stor->sortkey, battle_config.personal_storage_sort);
+		intif_send_s1_storage(stor);
+		if(battle_config.save_player_when_storage_closed) {
+			chrif_save(sd,0);
+		}
+		stor->dirty = 0;
+	}
+	stor->storage_status   = 0;
+	sd->state.storage_flag = 0;
+	clif_storageclose(sd);
+
+	return;
+}
+
+/*==========================================
+ * サブ１カプラ倉庫の保存
+ *------------------------------------------
+ */
+void s1_storage_storage_save(struct map_session_data *sd)
+{
+	struct s1_storage *stor;
+
+	nullpo_retv(sd);
+
+	stor = (struct s1_storage *)numdb_search(s1_storage_db,sd->status.account_id);
+	if(stor && stor->dirty) {
+		intif_send_s1_storage(stor);
+		stor->dirty = 0;
+	}
+
+	return;
+}
+
+
+
+
+/*==========================================
+ * サブ2カプラ倉庫データベース
+ *------------------------------------------
+ */
+static struct s2_storage *account2s2storage(int account_id)
+{
+	struct s2_storage *stor;
+
+	stor = (struct s2_storage *)numdb_search(s2_storage_db,account_id);
+	if(stor == NULL) {
+		stor = (struct s2_storage *)aCalloc(1,sizeof(struct s2_storage));
+		stor->account_id = account_id;
+		numdb_insert(s2_storage_db,stor->account_id,stor);
+	}
+	return stor;
+}
+
+/*==========================================
+ * サブ2カプラ倉庫を削除
+ *------------------------------------------
+ */
+void s2_storage_delete(int account_id)
+{
+	struct s2_storage *stor = (struct s2_storage *)numdb_erase(s2_storage_db,account_id);
+
+	if(stor)
+		aFree(stor);
+
+	return;
+}
+
+/*==========================================
+ * サブ2カプラ倉庫を開く
+ *------------------------------------------
+ */
+int s2_storage_storageopen(struct map_session_data *sd)
+{
+	struct s2_storage *stor;
+	int gmlvl = 0;
+
+	nullpo_retr(0, sd);
+
+	if(sd->state.storage_flag == 4)
+		return 0;	// 既にサブ２カプラ倉庫を開いている
+
+	gmlvl = pc_isGM(sd);
+	if(gmlvl > 0 && battle_config.gm_can_drop_lv > gmlvl)
+		return 0;	// 設定しているGMレベルより低い
+
+	if((stor = (struct s2_storage *)numdb_search(s2_storage_db,sd->status.account_id)) != NULL) {
+		if(stor->storage_status)
+			return 1;
+		stor->storage_status = 1;
+	}
+
+	if(sd->state.storage_flag == 1)
+		storage_storageclose(sd); // カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 3)
+		s1_storage_storageclose(sd); // サブ1カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 5)
+		s3_storage_storageclose(sd); // サブ3カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 2)
+		storage_guild_storageclose(sd); // ギルド倉庫をすでに開いている場合閉じる
+
+	if(stor != NULL) {
+		sd->state.storage_flag = 4;
+		clif_inventoryStart(sd, 2, msg_txt(216));
+		clif_s2_storageitemlist(sd,stor);
+		clif_s2_storageequiplist(sd,stor);
+		clif_update_s2_storageamount(sd,stor);
+		clif_inventoryEnd(sd, 2);
+	} else {
+		intif_request_s2_storage(sd->status.account_id);
+	}
+	return 0;
+}
+
+/*==========================================
+ * サブ2カプラ倉庫データの受信
+ *------------------------------------------
+ */
+int s2_storage_storageload(int account_id, struct s2_storage *s)
+{
+	struct map_session_data *sd;
+	struct s2_storage *stor;
+
+	nullpo_retr(1, s);
+
+	sd = map_id2sd(account_id);
+	if(sd == NULL || sd->state.waitingdisconnect) {
+		if(battle_config.error_log && sd == NULL)
+			printf("s2_storage_storageload: user not found %d\n", account_id);
+		s2_storage_delete(account_id);
+		return 1;
+	}
+
+	// 既に倉庫を開いてないかチェック
+	if(sd->state.storage_flag == 4)
+		return 0;
+	if(sd->state.storage_flag == 1)
+		storage_storageclose(sd); // カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 3)
+		s1_storage_storageclose(sd); // サブ1カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 5)
+		s3_storage_storageclose(sd); // サブ3カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 2)
+		storage_guild_storageclose(sd);
+
+	stor = account2s2storage(account_id);
+
+	if(battle_config.save_log)
+		printf("s2_storageload: %d\n", account_id);
+
+	memcpy(stor, s, sizeof(struct s2_storage));
+	storage_sortitem(stor->store_item, MAX_STORAGE, &stor->sortkey, battle_config.personal_storage_sort);
+	stor->storage_status   = 1;
+	sd->state.storage_flag = 4;
+	clif_inventoryStart(sd, 2, msg_txt(216));
+	clif_s2_storageitemlist(sd,stor);
+	clif_s2_storageequiplist(sd,stor);
+	clif_update_s2_storageamount(sd,stor);
+	clif_inventoryEnd(sd, 2);
+
+	return 0;
+}
+
+/*==========================================
+ * サブ2カプラ倉庫へアイテム追加
+ *------------------------------------------
+ */
+static int s2_storage_additem(struct map_session_data *sd,struct s2_storage *stor,struct item *item_data,int amount)
+{
+	struct item_data *data;
+	int i;
+
+	nullpo_retr(1, sd);
+	nullpo_retr(1, stor);
+	nullpo_retr(1, item_data);
+
+	if(item_data->nameid <= 0 || amount <= 0)
+		return 1;
+
+	nullpo_retr(1, data = itemdb_search(item_data->nameid));
+
+	if(!itemdb_isequip2(data)) {
+		// 装備品ではないので、既所有品なら個数のみ変化させる
+		for(i=0; i<MAX_STORAGE; i++) {
+			if(stor->store_item[i].nameid  == item_data->nameid  &&
+			   stor->store_item[i].card[0] == item_data->card[0] &&
+			   stor->store_item[i].card[1] == item_data->card[1] &&
+			   stor->store_item[i].card[2] == item_data->card[2] &&
+			   stor->store_item[i].card[3] == item_data->card[3] &&
+			   stor->store_item[i].limit   == item_data->limit)
+			{
+				if(stor->store_item[i].amount + amount > MAX_AMOUNT)
+					return 1;
+				stor->store_item[i].amount += amount;
+				stor->dirty = 1;
+				clif_s2_storageitemadded(sd,stor,i,amount);
+				return 0;
+			}
+		}
+	} else if(amount != 1) {
+		return 1;
+	}
+
+	// 装備品か未所有品だったので空き欄へ追加
+	for(i=0; i<MAX_STORAGE; i++) {
+		if(stor->store_item[i].nameid == 0) {
+			memcpy(&stor->store_item[i],item_data,sizeof(stor->store_item[0]));
+			stor->store_item[i].id     = ++stor->sortkey;
+			stor->store_item[i].amount = amount;
+			stor->storage_amount++;
+			stor->dirty = 1;
+			clif_s2_storageitemadded(sd,stor,i,amount);
+			clif_update_s2_storageamount(sd,stor);
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+/*==========================================
+ * サブ２カプラ倉庫からアイテムを減らす
+ *------------------------------------------
+ */
+static void s2_storage_delitem(struct map_session_data *sd,struct s2_storage *stor,int n,int amount)
+{
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	if(stor->store_item[n].nameid == 0 || stor->store_item[n].amount < amount)
+		return;
+
+	stor->store_item[n].amount -= amount;
+	if(stor->store_item[n].amount <= 0) {
+		memset(&stor->store_item[n],0,sizeof(stor->store_item[0]));
+		stor->store_item[n].id = 0;
+		stor->storage_amount--;
+		clif_update_s2_storageamount(sd,stor);
+	}
+	stor->dirty = 1;
+	clif_storageitemremoved(sd,n,amount);
+
+	return;
+}
+
+/*==========================================
+ * サブ２カプラ倉庫へ入れる
+ *------------------------------------------
+ */
+void s2_storage_storageadd(struct map_session_data *sd, int idx, int amount)
+{
+	struct s2_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s2_storage *)numdb_search(s2_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_INVENTORY)
+		return;
+	if(itemdb_isstorageable(sd->status.inventory[idx].nameid) == 0)
+		return;
+	if(amount < 1 || amount > sd->status.inventory[idx].amount)
+		return;
+
+	if(s2_storage_additem(sd, stor, &sd->status.inventory[idx], amount) == 0)
+		pc_delitem(sd, idx, amount, 0, 4);
+
+	return;
+}
+
+/*==========================================
+ * サブ２カプラ倉庫から出す
+ *------------------------------------------
+ */
+void s2_storage_storageget(struct map_session_data *sd, int idx, int amount)
+{
+	struct s2_storage *stor;
+	int flag;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s2_storage *)numdb_search(s2_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_STORAGE)
+		return;
+	if(amount < 1 || amount > stor->store_item[idx].amount)
+		return;
+
+	if((flag = pc_additem(sd, &stor->store_item[idx], amount,false)) == 0) {
+		s2_storage_delitem(sd, stor, idx, amount);
+		return;
+	}
+	clif_storageitemremoved(sd,idx,amount);
+	clif_additem(sd,0,0,flag);
+	clif_s2_storageitemadded(sd,stor,idx,amount);
+
+	return;
+}
+
+/*==========================================
+ * サブ２カプラ倉庫へカートから入れる
+ *------------------------------------------
+ */
+void s2_storage_storageaddfromcart(struct map_session_data *sd, int idx, int amount)
+{
+	struct s2_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s2_storage *)numdb_search(s2_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_CART)
+		return;
+	if(itemdb_isstorageable(sd->status.cart[idx].nameid) == 0)
+		return;
+	if(amount < 1 || amount > sd->status.cart[idx].amount)
+		return;
+
+	if(s2_storage_additem(sd, stor, &sd->status.cart[idx], amount) == 0)
+		pc_cart_delitem(sd, idx, amount, 0);
+
+	return;
+}
+
+/*==========================================
+ * サブ2カプラ倉庫からカートへ出す
+ *------------------------------------------
+ */
+void s2_storage_storagegettocart(struct map_session_data *sd, int idx, int amount)
+{
+	struct s2_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s2_storage *)numdb_search(s2_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_STORAGE)
+		return;
+	if(itemdb_iscartable(stor->store_item[idx].nameid) == 0)	// カートへ出せるかチェック
+		return;
+	if(amount < 1 || amount > stor->store_item[idx].amount)
+		return;
+
+	if(pc_cart_additem(sd, &stor->store_item[idx], amount) == 0)
+		s2_storage_delitem(sd, stor, idx, amount);
+
+	return;
+}
+
+/*==========================================
+ * サブ2カプラ倉庫を閉じて保存
+ *------------------------------------------
+ */
+void s2_storage_storageclose(struct map_session_data *sd)
+{
+	struct s2_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s2_storage *)numdb_search(s2_storage_db,sd->status.account_id));
+
+	if(stor->dirty) {
+		storage_sortitem(stor->store_item, MAX_STORAGE, &stor->sortkey, battle_config.personal_storage_sort);
+		intif_send_s2_storage(stor);
+		if(battle_config.save_player_when_storage_closed) {
+			chrif_save(sd,0);
+		}
+		stor->dirty = 0;
+	}
+	stor->storage_status   = 0;
+	sd->state.storage_flag = 0;
+	clif_storageclose(sd);
+
+	return;
+}
+
+/*==========================================
+ * サブ2カプラ倉庫の保存
+ *------------------------------------------
+ */
+void s2_storage_storage_save(struct map_session_data *sd)
+{
+	struct s2_storage *stor;
+
+	nullpo_retv(sd);
+
+	stor = (struct s2_storage *)numdb_search(s2_storage_db,sd->status.account_id);
+	if(stor && stor->dirty) {
+		intif_send_s2_storage(stor);
+		stor->dirty = 0;
+	}
+
+	return;
+}
+
+
+/*==========================================
+ * サブ3カプラ倉庫データベース
+ *------------------------------------------
+ */
+static struct s3_storage *account2s3storage(int account_id)
+{
+	struct s3_storage *stor;
+
+	stor = (struct s3_storage *)numdb_search(s3_storage_db,account_id);
+	if(stor == NULL) {
+		stor = (struct s3_storage *)aCalloc(1,sizeof(struct s3_storage));
+		stor->account_id = account_id;
+		numdb_insert(s3_storage_db,stor->account_id,stor);
+	}
+	return stor;
+}
+
+/*==========================================
+ * サブ3カプラ倉庫を削除
+ *------------------------------------------
+ */
+void s3_storage_delete(int account_id)
+{
+	struct s3_storage *stor = (struct s3_storage *)numdb_erase(s3_storage_db,account_id);
+
+	if(stor)
+		aFree(stor);
+
+	return;
+}
+
+/*==========================================
+ * サブ3カプラ倉庫を開く
+ *------------------------------------------
+ */
+int s3_storage_storageopen(struct map_session_data *sd)
+{
+	struct s3_storage *stor;
+	int gmlvl = 0;
+
+	nullpo_retr(0, sd);
+
+	if(sd->state.storage_flag == 5)
+		return 0;	// 既にサブ3カプラ倉庫を開いている
+
+	gmlvl = pc_isGM(sd);
+	if(gmlvl > 0 && battle_config.gm_can_drop_lv > gmlvl)
+		return 0;	// 設定しているGMレベルより低い
+
+	if((stor = (struct s3_storage *)numdb_search(s3_storage_db,sd->status.account_id)) != NULL) {
+		if(stor->storage_status)
+			return 1;
+		stor->storage_status = 1;
+	}
+
+	if(sd->state.storage_flag == 1)
+		storage_storageclose(sd); // カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 3)
+		s1_storage_storageclose(sd); // サブ1カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 4)
+		s2_storage_storageclose(sd); // サブ2カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 2)
+		storage_guild_storageclose(sd); // ギルド倉庫をすでに開いている場合閉じる
+
+	if(stor != NULL) {
+		sd->state.storage_flag = 5;
+		clif_inventoryStart(sd, 2, msg_txt(217));
+		clif_s3_storageitemlist(sd,stor);
+		clif_s3_storageequiplist(sd,stor);
+		clif_update_s3_storageamount(sd,stor);
+		clif_inventoryEnd(sd, 2);
+	} else {
+		intif_request_s3_storage(sd->status.account_id);
+	}
+	return 0;
+}
+
+/*==========================================
+ * サブ3カプラ倉庫データの受信
+ *------------------------------------------
+ */
+int s3_storage_storageload(int account_id, struct s3_storage *s)
+{
+	struct map_session_data *sd;
+	struct s3_storage *stor;
+
+	nullpo_retr(1, s);
+
+	sd = map_id2sd(account_id);
+	if(sd == NULL || sd->state.waitingdisconnect) {
+		if(battle_config.error_log && sd == NULL)
+			printf("s3_storage_storageload: user not found %d\n", account_id);
+		s3_storage_delete(account_id);
+		return 1;
+	}
+
+	// 既に倉庫を開いてないかチェック
+	if(sd->state.storage_flag == 5)
+		return 0;
+	if(sd->state.storage_flag == 1)
+		storage_storageclose(sd); // カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 3)
+		s1_storage_storageclose(sd); // サブ1カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 4)
+		s2_storage_storageclose(sd); // サブ2カプラ倉庫をすでに開いている場合閉じる
+
+	if(sd->state.storage_flag == 2)
+		storage_guild_storageclose(sd);
+
+	stor = account2s3storage(account_id);
+
+	if(battle_config.save_log)
+		printf("s3_storageload: %d\n", account_id);
+
+	memcpy(stor, s, sizeof(struct s3_storage));
+	storage_sortitem(stor->store_item, MAX_STORAGE, &stor->sortkey, battle_config.personal_storage_sort);
+	stor->storage_status   = 1;
+	sd->state.storage_flag = 5;
+	clif_inventoryStart(sd, 2, msg_txt(217));
+	clif_s3_storageitemlist(sd,stor);
+	clif_s3_storageequiplist(sd,stor);
+	clif_update_s3_storageamount(sd,stor);
+	clif_inventoryEnd(sd, 2);
+
+	return 0;
+}
+
+/*==========================================
+ * サブ3カプラ倉庫へアイテム追加
+ *------------------------------------------
+ */
+static int s3_storage_additem(struct map_session_data *sd,struct s3_storage *stor,struct item *item_data,int amount)
+{
+	struct item_data *data;
+	int i;
+
+	nullpo_retr(1, sd);
+	nullpo_retr(1, stor);
+	nullpo_retr(1, item_data);
+
+	if(item_data->nameid <= 0 || amount <= 0)
+		return 1;
+
+	nullpo_retr(1, data = itemdb_search(item_data->nameid));
+
+	if(!itemdb_isequip2(data)) {
+		// 装備品ではないので、既所有品なら個数のみ変化させる
+		for(i=0; i<MAX_STORAGE; i++) {
+			if(stor->store_item[i].nameid  == item_data->nameid  &&
+			   stor->store_item[i].card[0] == item_data->card[0] &&
+			   stor->store_item[i].card[1] == item_data->card[1] &&
+			   stor->store_item[i].card[2] == item_data->card[2] &&
+			   stor->store_item[i].card[3] == item_data->card[3] &&
+			   stor->store_item[i].limit   == item_data->limit)
+			{
+				if(stor->store_item[i].amount + amount > MAX_AMOUNT)
+					return 1;
+				stor->store_item[i].amount += amount;
+				stor->dirty = 1;
+				clif_s3_storageitemadded(sd,stor,i,amount);
+				return 0;
+			}
+		}
+	} else if(amount != 1) {
+		return 1;
+	}
+
+	// 装備品か未所有品だったので空き欄へ追加
+	for(i=0; i<MAX_STORAGE; i++) {
+		if(stor->store_item[i].nameid == 0) {
+			memcpy(&stor->store_item[i],item_data,sizeof(stor->store_item[0]));
+			stor->store_item[i].id     = ++stor->sortkey;
+			stor->store_item[i].amount = amount;
+			stor->storage_amount++;
+			stor->dirty = 1;
+			clif_s3_storageitemadded(sd,stor,i,amount);
+			clif_update_s3_storageamount(sd,stor);
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+/*==========================================
+ * サブ３カプラ倉庫からアイテムを減らす
+ *------------------------------------------
+ */
+static void s3_storage_delitem(struct map_session_data *sd,struct s3_storage *stor,int n,int amount)
+{
+	nullpo_retv(sd);
+	nullpo_retv(stor);
+
+	if(stor->store_item[n].nameid == 0 || stor->store_item[n].amount < amount)
+		return;
+
+	stor->store_item[n].amount -= amount;
+	if(stor->store_item[n].amount <= 0) {
+		memset(&stor->store_item[n],0,sizeof(stor->store_item[0]));
+		stor->store_item[n].id = 0;
+		stor->storage_amount--;
+		clif_update_s3_storageamount(sd,stor);
+	}
+	stor->dirty = 1;
+	clif_storageitemremoved(sd,n,amount);
+
+	return;
+}
+
+/*==========================================
+ * サブ3カプラ倉庫へ入れる
+ *------------------------------------------
+ */
+void s3_storage_storageadd(struct map_session_data *sd, int idx, int amount)
+{
+	struct s3_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s3_storage *)numdb_search(s3_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_INVENTORY)
+		return;
+	if(itemdb_isstorageable(sd->status.inventory[idx].nameid) == 0)
+		return;
+	if(amount < 1 || amount > sd->status.inventory[idx].amount)
+		return;
+
+	if(s3_storage_additem(sd, stor, &sd->status.inventory[idx], amount) == 0)
+		pc_delitem(sd, idx, amount, 0, 4);
+
+	return;
+}
+
+/*==========================================
+ * サブ3カプラ倉庫から出す
+ *------------------------------------------
+ */
+void s3_storage_storageget(struct map_session_data *sd, int idx, int amount)
+{
+	struct s3_storage *stor;
+	int flag;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s3_storage *)numdb_search(s3_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_STORAGE)
+		return;
+	if(amount < 1 || amount > stor->store_item[idx].amount)
+		return;
+
+	if((flag = pc_additem(sd, &stor->store_item[idx], amount,false)) == 0) {
+		s3_storage_delitem(sd, stor, idx, amount);
+		return;
+	}
+	clif_storageitemremoved(sd,idx,amount);
+	clif_additem(sd,0,0,flag);
+	clif_s3_storageitemadded(sd,stor,idx,amount);
+
+	return;
+}
+
+/*==========================================
+ * サブ３カプラ倉庫へカートから入れる
+ *------------------------------------------
+ */
+void s3_storage_storageaddfromcart(struct map_session_data *sd, int idx, int amount)
+{
+	struct s3_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s3_storage *)numdb_search(s3_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_CART)
+		return;
+	if(itemdb_isstorageable(sd->status.cart[idx].nameid) == 0)
+		return;
+	if(amount < 1 || amount > sd->status.cart[idx].amount)
+		return;
+
+	if(s3_storage_additem(sd, stor, &sd->status.cart[idx], amount) == 0)
+		pc_cart_delitem(sd, idx, amount, 0);
+
+	return;
+}
+
+/*==========================================
+ * サブ3カプラ倉庫からカートへ出す
+ *------------------------------------------
+ */
+void s3_storage_storagegettocart(struct map_session_data *sd, int idx, int amount)
+{
+	struct s3_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s3_storage *)numdb_search(s3_storage_db,sd->status.account_id));
+
+	if(!stor->storage_status)
+		return;
+	if(idx < 0 || idx >= MAX_STORAGE)
+		return;
+	if(itemdb_iscartable(stor->store_item[idx].nameid) == 0)	// カートへ出せるかチェック
+		return;
+	if(amount < 1 || amount > stor->store_item[idx].amount)
+		return;
+
+	if(pc_cart_additem(sd, &stor->store_item[idx], amount) == 0)
+		s3_storage_delitem(sd, stor, idx, amount);
+
+	return;
+}
+
+/*==========================================
+ * サブ3カプラ倉庫を閉じて保存
+ *------------------------------------------
+ */
+void s3_storage_storageclose(struct map_session_data *sd)
+{
+	struct s3_storage *stor;
+
+	nullpo_retv(sd);
+	nullpo_retv(stor = (struct s3_storage *)numdb_search(s3_storage_db,sd->status.account_id));
+
+	if(stor->dirty) {
+		storage_sortitem(stor->store_item, MAX_STORAGE, &stor->sortkey, battle_config.personal_storage_sort);
+		intif_send_s3_storage(stor);
+		if(battle_config.save_player_when_storage_closed) {
+			chrif_save(sd,0);
+		}
+		stor->dirty = 0;
+	}
+	stor->storage_status   = 0;
+	sd->state.storage_flag = 0;
+	clif_storageclose(sd);
+
+	return;
+}
+
+/*==========================================
+ * サブ3カプラ倉庫の保存
+ *------------------------------------------
+ */
+void s3_storage_storage_save(struct map_session_data *sd)
+{
+	struct s3_storage *stor;
+
+	nullpo_retv(sd);
+
+	stor = (struct s3_storage *)numdb_search(s3_storage_db,sd->status.account_id);
+	if(stor && stor->dirty) {
+		intif_send_s3_storage(stor);
+		stor->dirty = 0;
+	}
+
+	return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*==========================================
  *
  *------------------------------------------
@@ -898,6 +2124,24 @@ static int guild_storage_db_final(void *key,void *data,va_list ap)
 	return 0;
 }
 
+static int s1_storage_db_final(void *key,void *data,va_list ap)
+{
+	aFree(data);
+	return 0;
+}
+
+static int s2_storage_db_final(void *key,void *data,va_list ap)
+{
+	aFree(data);
+	return 0;
+}
+
+static int s3_storage_db_final(void *key,void *data,va_list ap)
+{
+	aFree(data);
+	return 0;
+}
+
 /*==========================================
  * キャッシュのクリア
  *------------------------------------------
@@ -906,6 +2150,12 @@ void storage_clear_cache(void)
 {
 	if(storage_db)
 		numdb_clear(storage_db,storage_db_final);
+	if(s1_storage_db)
+		numdb_clear(s1_storage_db,s1_storage_db_final);
+	if(s2_storage_db)
+		numdb_clear(s2_storage_db,s2_storage_db_final);
+	if(s3_storage_db)
+		numdb_clear(s3_storage_db,s3_storage_db_final);
 	if(guild_storage_db)
 		numdb_clear(guild_storage_db,guild_storage_db_final);
 
@@ -926,6 +2176,18 @@ void do_final_storage(void)
 		numdb_final(guild_storage_db,guild_storage_db_final);
 		guild_storage_db = NULL;
 	}
+	if(s1_storage_db) {
+		numdb_final(s1_storage_db,s1_storage_db_final);
+		s1_storage_db = NULL;
+	}
+	if(s2_storage_db) {
+		numdb_final(s2_storage_db,s2_storage_db_final);
+		s2_storage_db = NULL;
+	}
+	if(s3_storage_db) {
+		numdb_final(s3_storage_db,s3_storage_db_final);
+		s3_storage_db = NULL;
+	}
 
 	return;
 }
@@ -938,6 +2200,9 @@ void do_init_storage(void)
 {
 	storage_db = numdb_init();
 	guild_storage_db = numdb_init();
+	s1_storage_db = numdb_init();
+	s2_storage_db = numdb_init();
+	s3_storage_db = numdb_init();
 
 	return;
 }

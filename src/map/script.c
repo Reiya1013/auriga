@@ -4145,6 +4145,9 @@ int buildin_gettimetick(struct script_state *st);
 int buildin_gettime(struct script_state *st);
 int buildin_gettimestr(struct script_state *st);
 int buildin_openstorage(struct script_state *st);
+int buildin_open_s1_storage(struct script_state *st);
+int buildin_open_s2_storage(struct script_state *st);
+int buildin_open_s3_storage(struct script_state *st);
 int buildin_guildopenstorage(struct script_state *st);
 int buildin_itemskill(struct script_state *st);
 int buildin_produce(struct script_state *st);
@@ -4498,6 +4501,9 @@ struct script_function buildin_func[] = {
 	{buildin_gettime,"gettime","i"},
 	{buildin_gettimestr,"gettimestr","si"},
 	{buildin_openstorage,"openstorage",""},
+	{buildin_open_s1_storage,"open_s1_storage",""},
+	{buildin_open_s2_storage,"open_s2_storage",""},
+	{buildin_open_s3_storage,"open_s3_storage",""},
 	{buildin_guildopenstorage,"guildopenstorage",""},
 	{buildin_itemskill,"itemskill","iis*"},
 	{buildin_produce,"produce","i"},
@@ -7696,6 +7702,21 @@ int buildin_gettimestr(struct script_state *st)
 int buildin_openstorage(struct script_state *st)
 {
 	storage_storageopen(script_rid2sd(st));
+	return 0;
+}
+int buildin_open_s1_storage(struct script_state *st)
+{
+	s1_storage_storageopen(script_rid2sd(st));
+	return 0;
+}
+int buildin_open_s2_storage(struct script_state *st)
+{
+	s2_storage_storageopen(script_rid2sd(st));
+	return 0;
+}
+int buildin_open_s3_storage(struct script_state *st)
+{
+	s3_storage_storageopen(script_rid2sd(st));
 	return 0;
 }
 

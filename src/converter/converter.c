@@ -61,6 +61,9 @@ char char_txt[1024]            = "save/auriga.txt";
 char GM_account_filename[1024] = "conf/GM_account.txt";
 char pet_txt[1024]             = "save/pet.txt";
 char storage_txt[1024]         = "save/storage.txt";
+char s1_storage_txt[1024]      = "save/s1_storage.txt";
+char s2_storage_txt[1024]      = "save/s2_storage.txt";
+char s3_storage_txt[1024]      = "save/s3_storage.txt";
 char party_txt[1024]           = "save/party.txt";
 char guild_txt[1024]           = "save/guild.txt";
 char guild_storage_txt[1024]   = "save/g_storage.txt";
@@ -109,6 +112,15 @@ static int config_read(const char *cfgName)
 		} else if(strcmpi(w1,"storage_txt")==0){
 			printf("set storage_txt : %s\n",w2);
 			auriga_strlcpy(storage_txt, w2, sizeof(storage_txt));
+		} else if(strcmpi(w1,"s1_storage_txt")==0){
+			printf("set s1_storage_txt : %s\n",w2);
+			auriga_strlcpy(s1_storage_txt, w2, sizeof(s1_storage_txt));
+		} else if(strcmpi(w1,"s2_storage_txt")==0){
+			printf("set s2_storage_txt : %s\n",w2);
+			auriga_strlcpy(s2_storage_txt, w2, sizeof(s2_storage_txt));
+		} else if(strcmpi(w1,"s3_storage_txt")==0){
+			printf("set s3_storage_txt : %s\n",w2);
+			auriga_strlcpy(s3_storage_txt, w2, sizeof(s3_storage_txt));
 		} else if(strcmpi(w1,"party_txt")==0){
 			printf("set party_txt : %s\n",w2);
 			auriga_strlcpy(party_txt, w2, sizeof(party_txt));

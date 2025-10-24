@@ -308,6 +308,18 @@ storage_txt
 	倉庫データを格納するファイル名です。
 	省略可能で、デフォルトは save/storage.txt です。
 
+s1_storage_txt
+	サブ倉庫１データを格納するファイル名です。
+	省略可能で、デフォルトは save/s1_storage.txt です。
+
+s2_storage_txt
+	サブ倉庫２データを格納するファイル名です。
+	省略可能で、デフォルトは save/s2_storage.txt です。
+
+s3_storage_txt
+	サブ倉庫３データを格納するファイル名です。
+	省略可能で、デフォルトは save/s3_storage.txt です。
+
 party_txt
 	パーティデータを格納するファイル名です。
 	省略可能で、デフォルトは save/party.txt です。
@@ -2137,6 +2149,20 @@ speed
 	@コマンド @speed
 storage
 	@コマンド @storage
+s1_storage
+	@コマンド @s1_storage
+s2_storage
+	@コマンド @s2_storage
+s3_storage
+	@コマンド @s3_storage
+s0
+	@コマンド @s0
+s1
+	@コマンド @s1
+s2
+	@コマンド @s2
+s3
+	@コマンド @s3
 gstorage
 	@コマンド @gstorage
 option
@@ -2390,6 +2416,13 @@ save: 1
 load: 1
 speed: 1
 storage: 1
+s1_storage: 1
+s2_storage: 1
+s3_storage: 1
+s0: 1
+s1: 1
+s2: 1
+s3: 1
 gstorage: 1
 option: 1
 hide: 1

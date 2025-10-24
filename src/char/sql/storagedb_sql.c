@@ -34,6 +34,9 @@
 #include "storagedb_sql.h"
 
 static struct dbt *storage_db  = NULL;
+static struct dbt *s1_storage_db = NULL;
+static struct dbt *s2_storage_db = NULL;
+static struct dbt *s3_storage_db = NULL;
 
 /*==========================================
  * İ’èƒtƒ@ƒCƒ‹‚Ì“Ç

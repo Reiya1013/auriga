@@ -57,6 +57,75 @@ int mapif_save_storage_ack(int fd,int account_id)
 	return 0;
 }
 
+// サブ1倉庫データの送信
+int mapif_load_s1_storage(int fd,int account_id)
+{
+	const struct s1_storage *s = s1_storagedb_load(account_id);
+
+	WFIFOW(fd,0)=0x3812; 
+	WFIFOW(fd,2)=sizeof(struct s1_storage)+8;
+	WFIFOL(fd,4)=account_id;
+	memcpy(WFIFOP(fd,8),s,sizeof(struct s1_storage));
+	WFIFOSET(fd,WFIFOW(fd,2));
+	return 0;
+}
+
+// サブ1倉庫データ保存完了送信
+int mapif_save_s1_storage_ack(int fd,int account_id)
+{
+	WFIFOW(fd,0)=0x3813; 
+	WFIFOL(fd,2)=account_id;
+	WFIFOB(fd,6)=0;
+	WFIFOSET(fd,7);
+	return 0;
+}
+
+// サブ2倉庫データの送信
+int mapif_load_s2_storage(int fd,int account_id)
+{
+	const struct s2_storage *s = s2_storagedb_load(account_id);
+
+	WFIFOW(fd,0)=0x3814; 
+	WFIFOW(fd,2)=sizeof(struct s2_storage)+8;
+	WFIFOL(fd,4)=account_id;
+	memcpy(WFIFOP(fd,8),s,sizeof(struct s2_storage));
+	WFIFOSET(fd,WFIFOW(fd,2));
+	return 0;
+}
+
+// サブ2倉庫データ保存完了送信
+int mapif_save_s2_storage_ack(int fd,int account_id)
+{
+	WFIFOW(fd,0)=0x3815; 
+	WFIFOL(fd,2)=account_id;
+	WFIFOB(fd,6)=0;
+	WFIFOSET(fd,7);
+	return 0;
+}
+
+// サブ3倉庫データの送信
+int mapif_load_s3_storage(int fd,int account_id)
+{
+	const struct s3_storage *s = s3_storagedb_load(account_id);
+
+	WFIFOW(fd,0)=0x3816; 
+	WFIFOW(fd,2)=sizeof(struct s3_storage)+8;
+	WFIFOL(fd,4)=account_id;
+	memcpy(WFIFOP(fd,8),s,sizeof(struct s3_storage));
+	WFIFOSET(fd,WFIFOW(fd,2));
+	return 0;
+}
+
+// サブ3倉庫データ保存完了送信
+int mapif_save_s3_storage_ack(int fd,int account_id)
+{
+	WFIFOW(fd,0)=0x3817; 
+	WFIFOL(fd,2)=account_id;
+	WFIFOB(fd,6)=0;
+	WFIFOSET(fd,7);
+	return 0;
+}
+
 // ギルド倉庫データの送信
 int mapif_load_guild_storage(int fd,int account_id,int guild_id)
 {
@@ -142,6 +211,72 @@ int mapif_parse_SaveStorage(int fd)
 		printf("inter storage: data size error %lu %d\n",(unsigned long)sizeof(struct storage),len-8);
 	} else {
 		storagedb_save((struct storage *)RFIFOP(fd,8));
+		mapif_save_storage_ack(fd,account_id);
+	}
+	return 0;
+}
+
+// サブ1倉庫データ要求受信
+int mapif_parse_Load_s1_Storage(int fd)
+{
+	mapif_load_s1_storage(fd,RFIFOL(fd,2));
+	return 0;
+}
+
+// サブ1倉庫データ受信＆保存
+int mapif_parse_Save_s1_Storage(int fd)
+{
+	int account_id=RFIFOL(fd,4);
+	int len=RFIFOW(fd,2);
+
+	if(sizeof(struct s1_storage)!=len-8){
+		printf("inter storage: data size error %lu %d\n",(unsigned long)sizeof(struct s1_storage),len-8);
+	} else {
+		s1_storagedb_save((struct s1_storage *)RFIFOP(fd,8));
+		mapif_save_storage_ack(fd,account_id);
+	}
+	return 0;
+}
+
+// サブ2倉庫データ要求受信
+int mapif_parse_Load_s2_Storage(int fd)
+{
+	mapif_load_s2_storage(fd,RFIFOL(fd,2));
+	return 0;
+}
+
+// サブ2倉庫データ受信＆保存
+int mapif_parse_Save_s2_Storage(int fd)
+{
+	int account_id=RFIFOL(fd,4);
+	int len=RFIFOW(fd,2);
+
+	if(sizeof(struct s2_storage)!=len-8){
+		printf("inter storage: data size error %lu %d\n",(unsigned long)sizeof(struct s2_storage),len-8);
+	} else {
+		s2_storagedb_save((struct s2_storage *)RFIFOP(fd,8));
+		mapif_save_storage_ack(fd,account_id);
+	}
+	return 0;
+}
+
+// サブ3倉庫データ要求受信
+int mapif_parse_Load_s3_Storage(int fd)
+{
+	mapif_load_s3_storage(fd,RFIFOL(fd,2));
+	return 0;
+}
+
+// サブ3倉庫データ受信＆保存
+int mapif_parse_Save_s3_Storage(int fd)
+{
+	int account_id=RFIFOL(fd,4);
+	int len=RFIFOW(fd,2);
+
+	if(sizeof(struct s3_storage)!=len-8){
+		printf("inter storage: data size error %lu %d\n",(unsigned long)sizeof(struct s3_storage),len-8);
+	} else {
+		s3_storagedb_save((struct s3_storage *)RFIFOP(fd,8));
 		mapif_save_storage_ack(fd,account_id);
 	}
 	return 0;
@@ -248,6 +383,13 @@ int inter_storage_parse_frommap(int fd)
 	switch(RFIFOW(fd,0)){
 	case 0x3010: mapif_parse_LoadStorage(fd); break;
 	case 0x3011: mapif_parse_SaveStorage(fd); break;
+	case 0x3012: mapif_parse_Load_s1_Storage(fd); break;
+	case 0x3013: mapif_parse_Save_s1_Storage(fd); break;
+	case 0x3014: mapif_parse_Load_s2_Storage(fd); break;
+	case 0x3015: mapif_parse_Save_s2_Storage(fd); break;
+	case 0x3016: mapif_parse_Load_s3_Storage(fd); break;
+	case 0x3017: mapif_parse_Save_s3_Storage(fd); break;
+
 	case 0x3018: mapif_parse_LoadGuildStorage(fd); break;
 	case 0x3019: mapif_parse_SaveGuildStorage(fd); break;
 	case 0x301a: mapif_parse_TrylockGuildStorage(fd); break;

@@ -417,7 +417,7 @@ struct map_session_data {
 		unsigned gangsterparadise : 1;
 		unsigned taekwonrest : 1;
 		unsigned potionpitcher_flag : 1;
-		unsigned storage_flag : 2;	// 0:倉庫未使用, 1:個人倉庫使用中, 2:ギルド倉庫使用中
+		unsigned storage_flag : 3;	// 0:倉庫未使用, 1:個人倉庫使用中, 2:ギルド倉庫使用中, 3:サブ1倉庫使用中, 4:サブ2倉庫使用中, 5:サブ3倉庫使用中
 		unsigned autoloot : 1;
 		unsigned refuse_emergencycall : 1;
 		unsigned reg_dirty : 1;
