@@ -1098,7 +1098,10 @@ static int clif_set0078(struct map_session_data *sd,unsigned char *buf)
 	WBUFL(buf,73) = 0xffffffff;
 	WBUFL(buf,77) = 0xffffffff;
 	WBUFB(buf,81) = 0;
-	WBUFW(buf,82) = sd->status.style;
+    if(sd->status.style)
+        WBUFW(buf,82) = sd->status.style;
+    else
+        WBUFW(buf,82) = sd->view_class;
 	strncpy(WBUFP(buf,84),sd->status.name,24);
 
 	return WBUFW(buf,2);
@@ -1491,7 +1494,10 @@ static int clif_set007b(struct map_session_data *sd,unsigned char *buf)
 	WBUFL(buf,79)=0xffffffff;
 	WBUFL(buf,83)=0xffffffff;
 	WBUFB(buf,87)=0;
-	WBUFW(buf,88)=sd->status.style;
+    if(sd->status.style)
+        WBUFW(buf,88)=sd->status.style;
+    else
+		WBUFW(buf,88)=sd->view_class;
 	strncpy(WBUFP(buf,90),sd->status.name,24);
 
 	return WBUFW(buf,2);
