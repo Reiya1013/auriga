@@ -38,7 +38,7 @@
 #define MAX_EVENTQUEUE	2
 #define MAX_EVENTTIMER	32
 #define NATURAL_HEAL_INTERVAL 500
-#define MAX_LEVEL 260
+#define MAX_LEVEL 1000
 #define MAX_WALKPATH 32
 #define MAX_DROP_PER_MAP 8
 #define MAX_WIS_REFUSAL 14
@@ -65,7 +65,7 @@
 #define MAX_DEAL_ITEMS 10
 #define MAX_VENDING 12
 #define MAX_WEAPON_LEVEL 4	// 最大武器Lv
-#define MAX_REFINE 10		// 最大精錬値
+#define MAX_REFINE 11		// 最大精錬値
 #define MAX_ELE_LEVEL 4		// 最大属性Lv
 #define MAX_SIZE_FIX 3		// サイズの種類
 #define MAX_FREEZE_SPELL 7	// リーディングスペルブックで保持できるスキル数
