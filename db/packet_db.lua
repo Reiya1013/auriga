@@ -2466,7 +2466,7 @@ if (packet_ver == 20080910 or packet_ver == 20081126 or packet_ver == 20090114) 
 	p(0x0439,8,"useitem",{2,4})
 end
 
--- ˆÈ‰º‚Í RagnarokRE
+--  È‰    RagnarokRE
 
 if packet_ver >= 20080827 and packet_pre == 0 then
 	p(0x007c,44)
@@ -3408,5 +3408,89 @@ end
 if packet_ver >= 20220831 then
 	p(0x0bbe,6)
 end
+
+
+
+if packet_ver >= 20230607 then
+	p(0xbdd,-1)
+end
+
+if packet_ver >= 20230705 then
+	p(0xbe9,6)
+end
+
+if packet_ver >= 20230802 then
+	p(0xbf3,-1)
+end
+
+if packet_ver >= 20230830 then
+	p(0xbe2,137)
+end
+
+if packet_ver >= 20240502 then
+	p(0xc0b,18)
+end
+
+if packet_ver >= 20250122 then
+	p(0xc22,12)
+end
+
+
+
+if packet_ver >= 20240215 then
+--	p(0x0bbe,6)
+	p(0x0b39)
+	p(0x0b25)
+	p(0x0b41)
+	p(0x0b9a)
+	p(0x0b42)
+	p(0x0800)
+	p(0x0b65)
+	p(0x01fc)
+	p(0x0b43)
+	p(0x096f)
+	p(0x096d)
+	p(0x0bae)
+	p(0x0ba1)
+	p(0x0b5a)
+	p(0x0b5d)
+	p(0x0b5e)
+	p(0x01b3)
+	p(0x02f7)
+	p(0x016c)
+	p(0x0bb0)
+	p(0x0090)
+	p(0x0972)
+	p(0x00b4)
+	p(0x00b5)
+	p(0x0973)
+	p(0x0ba2)
+	p(0x0ba3)
+	p(0x0bb5)
+	p(0x0b8c)
+	p(0x0126)
+	p(0x0b8f)
+	p(0x0b90)
+	p(0x0b91)
+	p(0x0b92)
+	p(0x0baf)
+	p(0x0b9b)
+	p(0x0b9c)
+	p(0x0b9d)
+	p(0x0b9e)
+	p(0x0b9f)
+	p(0x0ba0)
+	p(0x0287)
+	p(0x0298)
+	p(0x0299)
+	p(0x0846)
+	p(0x0848)
+	p(0x08c0)
+	p(0x0a46)
+	p(0x0a47)
+	p(0x0afc)
+	p(0x472b)
+end
+
 
 --dofile("./db/packet_shuffle.lua")

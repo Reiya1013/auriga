@@ -1,0 +1,5 @@
+Language Japanese
+mob_skill_db_autoload 0
+mob_skill_db_Path C:\acer\デスクトップ\auriga_zip\Auriga-0968Full\db\mob_skill_db.txt
+mob_db_autoload 0
+mob_db_Path C:\acer\デスクトップ\auriga_zip\Auriga-0968Full\db\mob_db.txt

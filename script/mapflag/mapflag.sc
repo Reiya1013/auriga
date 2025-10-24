@@ -582,6 +582,7 @@ lhz_dun01.gat	mapflag	nomemo	dummy
 lhz_dun02.gat	mapflag	nomemo	dummy
 lhz_dun03.gat	mapflag	nomemo	dummy
 lhz_dun04.gat	mapflag	nomemo	dummy
+lhz_dun_n.gat	mapflag	nomemo	dummy
 lhz_in01.gat	mapflag	nomemo	dummy
 lhz_in01.gat	mapflag	noteleport	dummy
 lhz_in01.gat	mapflag	nobranch	dummy

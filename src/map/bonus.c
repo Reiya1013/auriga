@@ -490,6 +490,26 @@ int bonus_param1(struct map_session_data *sd,int type,int val)
 		if(sd->state.lr_flag != 2)
 			sd->parame[type-SP_STR] += val;
 		break;
+	case SP_CLASS:       //内部的にはPOWとして処理してる
+	case SP_ZENY:        //内部的にはSTAとして処理してる
+	case SP_SEX:         //内部的にはWISとして処理してる
+	case SP_NEXTBASEEXP: //内部的にはSPLとして処理してる
+	case SP_NEXTJOBEXP:	 //内部的にはCONとして処理してる
+	case SP_WEIGHT:      //内部的にはCRTとして処理してる
+		if(sd->state.lr_flag != 2)
+			sd->parame[type-SP_CLASS+6] += val;
+		break;
+//　本来はこうあるべき-S
+//	case SP_POW:
+//	case SP_STA:
+//	case SP_WIS:
+//	case SP_SPL:
+//	case SP_CON:
+//	case SP_CRT:
+//		if(sd->state.lr_flag != 2)
+//			sd->parame[type-SP_POW+6] += val;
+//		break;
+// 　本来はこうあるべき-E
 	case SP_ALLSTATUS:
 		if(sd->state.lr_flag != 2) {
 			sd->parame[0] += val;

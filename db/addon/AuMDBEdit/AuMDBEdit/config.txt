@@ -1,0 +1,8 @@
+# Auriga mob_db editor by Pneuma
+
+Language Japanese
+
+item_db_Path 
+mob_db_Path D:\ro_emu\auriga-master\db\addon\
+mob_db_autoload 0
+item_db_autoload 0

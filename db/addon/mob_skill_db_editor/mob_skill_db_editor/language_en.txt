@@ -1,0 +1,222 @@
+LanguageType	English
+
+Menu_0	&File
+Menu_1	&Open...
+Menu_2	Open mob_db.txt...
+Menu_3	&Save
+Menu_4	Save &As...
+Menu_5	&Exit
+Menu_6	&Edit
+Menu_7	&Undo
+Menu_8	&Copy Line
+Menu_9	&Paste Line
+Menu_10	&Delete Line
+Menu_11	&Search...
+Menu_12	&Add new data under selected data
+Menu_13	&Insert comment line
+Menu_14	&Option
+Menu_15	&Language
+Menu_16	&Setting...
+Menu_17	Auto rename dummy value
+Menu_18	Auto rename dummy value all
+Menu_19	MobID change(multi selected)
+
+Label_0		MOB_ID
+Label_1		dummy value
+Label_2		STATE
+Label_3		SKILL_ID
+Label_4		SKILL_LV
+Label_5		rate
+Label_6		casttime
+Label_7		delay
+Label_8		cancelable
+Label_9		target
+Label_10	Condition type
+Label_11	Condition value
+Label_12	val1
+Label_13	val2
+Label_14	val3
+Label_15	val4
+Label_16	val5
+Label_17	Emotion
+Label_18	Chat
+Label_19	Auto rename
+Label_20	Data has unsaved changes. Would you like to save these changes?
+Label_21	@
+
+OptionForm_Label_0	Auto open 'mob_skill_db.txt'
+OptionForm_Label_1	Auto open 'mob_db.txt'
+
+SearchForm_Caption	Search
+SearchForm_Keyword	Keyword
+SearchForm_Forward	&Forward
+SearchForm_Reverse	&Reverse
+SearchForm_Close	Close
+
+SearchMob_Caption	Mob Search
+SearchMob_Search	Search
+
+SearchSkill_Caption	Skill Search
+SearchSkill_Search	Search
+
+State_0		any|except dead
+State_1		idle|in standby
+State_2		walk|in movement
+State_3		dead|on killed
+State_4		loot|on loot
+State_5		attack|on attack
+State_6		angry|on angry
+State_7		chase|following target, after being attacked
+State_8		follow|following target, without being attacked
+State_9		command|not use?
+
+Cancelable_0	no|
+Cancelable_1	yes|
+
+Target_0	target|current target
+Target_1	self|
+Target_2	friend|
+Target_3	master|
+Target_4	modechange|another mob's mode change
+Target_5	targetchange|another mob's target change
+Target_6	anothertarget|another target
+Target_7	around|9x9 area around self
+Target_8	around1|3x3 area around self
+Target_9	around2|5x5 area around self
+Target_10	around3|7x7 area around self
+Target_11	around4|9x9 area around self
+Target_12	around5|3x3 area around target
+Target_13	around6|5x5 area around target
+Target_14	around7|7x7 area around target
+Target_15	around8|9x9 area around target
+
+ConditionType_0		always|unconditional
+ConditionType_1		onspawn|when the mob spawns/respawns.
+ConditionType_2		myhpltmaxrate|when the mob's hp drops to a certain %
+ConditionType_3		myhpinrate|when the mob's hp is in a certain % range
+ConditionType_4		mystatuson|If the mob has any abnormalities in status (condition value)
+ConditionType_5		mystatusoff|If the mob has ended any abnormalities in status (condition value)
+ConditionType_6		friendhpltmaxrate|when the mob's friend's hp drops to a certain %
+ConditionType_7		friendhpinrate|when the mob's friend's hp is in a certain % range
+ConditionType_8		friendstatuson|If the friend has any abnormalities in status (condition value)
+ConditionType_9		friendstatusoff|If the friend has ended any abnormalities in status (condition value)
+ConditionType_10	attackpcgt|Attack PC becomes more than the  number of specification
+ConditionType_11	attackpcge|Attack PC becomes equal or more than the number of specification.
+ConditionType_12	slavelt|when the number of slaves is lower than the original number of specification.
+ConditionType_13	slavele|when the number of slaves is lower or equal than the original number of specification.
+ConditionType_14	closedattacked|when melee attacked (close range attack)
+ConditionType_15	longrangeattacked|when long ranged attacked (like bows and far range weapons)
+ConditionType_16	skillused|when a skill is used on the mob
+ConditionType_17	afterskill|after the mob used certain skill.
+ConditionType_18	casttargeted|when a target is in cast range.
+ConditionType_19	rudeattacked|when a target is rude attacked
+
+Status_0	anybad|any type of state change
+Status_1	stone|condition of being in stone state
+Status_2	freeze|condition of being in frozen state
+Status_3	stun|condition of being in stunned state
+Status_4	sleep|condition of being in sleep state
+Status_5	poison|condition of being in poisoned state
+Status_6	curse|condition of being in cursed state
+Status_7	silence|condition of being in silenced state
+Status_8	confusion|condition of being in confusion state
+Status_9	blind|condition of being in blind state
+Status_10	hiding|condition of being in hidden state
+Status_11	sight|condition of being in unhidden state
+States_12	lexaeterna|
+
+Emotion_0 /!
+Emotion_1 /?
+Emotion_2 /delight
+Emotion_3 /heart
+Emotion_4 /sweat
+Emotion_5 /aha
+Emotion_6 /fret
+Emotion_7 /anger
+Emotion_8 /money
+Emotion_9 /Åc
+Emotion_10 /\
+Emotion_11 /+
+Emotion_12 /-
+Emotion_13 /hung
+Emotion_14 /lv2
+Emotion_15 /thx
+Emotion_16 /wah
+Emotion_17 /sorry
+Emotion_18 /smile
+Emotion_19 /swt2
+Emotion_20 /hmm
+Emotion_21 /no1
+Emotion_22 /??
+Emotion_23 /omg
+Emotion_24 /o
+Emotion_25 /x
+Emotion_26 /hlp
+Emotion_27 /go
+Emotion_28 /sob
+Emotion_29 /gg
+Emotion_30 /kis
+Emotion_31 /kis2
+Emotion_32 /pif
+Emotion_33 /ok
+Emotion_34 red ...
+Emotion_35 flag(indnesia)
+Emotion_36 /e1/bzz
+Emotion_37 /e2/rice
+Emotion_38 /e3/awsm
+Emotion_39 /e4/meh
+Emotion_40 /e5/shy
+Emotion_41 /e6/pat
+Emotion_42 /e7(SP)
+Emotion_43 /e8/slur
+Emotion_44 /e9/com
+Emotion_45 /e10/yawn
+Emotion_46 /e11/grat
+Emotion_47 /e12(HP)
+Emotion_48 flag(philip)
+Emotion_49 flag(america)
+Emotion_50 flag(singapore)
+Emotion_51 flag(brasil)
+Emotion_52 /e13/fsh
+Emotion_53 /e14/spin
+Emotion_54 /e15/sigh
+Emotion_55 /e16/dum
+Emotion_56 /e17/crwd
+Emotion_57 /e18/OTL
+Emotion_58 /e19/dice(1)
+Emotion_59 /e19/dice(2)
+Emotion_60 /e19/dice(3)
+Emotion_61 /e19/dice(4)
+Emotion_62 /e19/dice(5)
+Emotion_63 /e19/dice(6)
+Emotion_64 flag(unknown)
+Emotion_65 /e20(finger)
+Emotion_66 flag(russia)
+Emotion_67 flag(unknown)
+Emotion_68 /e21(tel)
+Emotion_69 /e22(mail)
+Emotion_70 /e23(out of range)
+Emotion_71 /e24(Tl)
+Emotion_72 /e25(Tll)
+Emotion_73 /e26(Tlll)
+Emotion_74 /e27/hum
+Emotion_75 /e28/abs
+Emotion_76 /e29/oops
+Emotion_77 /e30/spit
+Emotion_78 /e31/ene
+Emotion_79 /e32/panic
+Emotion_80 /e33/whisp
+
+Mode_0	CanMove
+Mode_1	Looter
+Mode_2	Aggressive
+Mode_3	Assist
+Mode_4	CastSensor
+Mode_5	Boss
+Mode_6	Plant
+Mode_7	CanAttack
+Mode_8	ChangeChase
+Mode_9	ChangeTarget_melee
+Mode_10	ChangeTarget_chase
+Mode_11	TargetWeak
+Mode_12	RandomTarget

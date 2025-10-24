@@ -1192,6 +1192,12 @@ static atn_bignumber battle_calc_damage(struct block_list *src, struct block_lis
 				damage = (!battle_config.skill_min_damage && flag&BF_MAGIC && src->type == BL_PC)? 0: 1;
 		}
 
+		if (bl->type == BL_MOB) {
+            unsigned m = status_get_mode(bl);
+            printf("[DMG CHECK] before reduction: dmg=%lld mode=0x%08x\n",
+            (long long)damage, m);
+		}
+
 		// mob mode
 		if(bl->type == BL_MOB) {
 			// 本来は重複するが排他扱いで実装しておく
@@ -5520,9 +5526,9 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src,struct blo
 			break;
 		case BO_EXPLOSIVE_POWDER:	/* エクスプロッシブパウダー */
 			if(sc && sc->data[SC_RESEARCHREPORT].timer != -1) {
-				DMG_FIX( (3700 + skill_lv*1000 + status_get_pow(src)*29) * status_get_lv(src) / 100, 100 );
+				DMG_FIX( (6750 + skill_lv*1750 + status_get_pow(src)*29) * status_get_lv(src) / 100, 100 );
 			} else {
-				DMG_FIX( (3150 + skill_lv*750 + status_get_pow(src)*23) * status_get_lv(src) / 100, 100 );
+				DMG_FIX( (5750 + skill_lv*1500 + status_get_pow(src)*23) * status_get_lv(src) / 100, 100 );
 			}
 			break;
 		case BO_MAYHEMIC_THORNS:	/* メイヘミックソーンズ */

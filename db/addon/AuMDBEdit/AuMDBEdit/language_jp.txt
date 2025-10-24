@@ -1,0 +1,92 @@
+LanguageType	Japanese
+
+Menu_0	ファイル(&F)
+Menu_1	開く(&O)...
+Menu_2	item_db.txtを開きなおす...
+Menu_3	上書き保存(&S)
+Menu_4	名前を付けて保存(&A)...
+Menu_5	閉じる(&X)
+Menu_6	編集(&E)
+Menu_7	元に戻す(&U)
+Menu_8	行のコピー(&C)
+Menu_9	行の貼り付け(&P)
+Menu_10	行の削除(&D)
+Menu_11	検索(&S)...
+Menu_12	選択行の下に新規行の追加
+Menu_13	コメント行挿入
+Menu_14	設定(&O)
+Menu_15	言語(&L)
+Menu_16	ファイル設定(&F)...
+Menu_17	'//'挿入
+Menu_18	'//'削除
+
+OptionForm_Label_0	mob_db.txtの自動読み込み
+OptionForm_Label_1	item_db.txtの自動読み込み
+
+Scale_0	小
+Scale_1	中
+Scale_2	大
+
+Race_0	無形
+Race_1	不死
+Race_2	動物
+Race_3	植物
+Race_4	昆虫
+Race_5	魚貝
+Race_6	悪魔
+Race_7	人間
+Race_8	天使
+Race_9	竜
+
+Element_0	無
+Element_1	水
+Element_2	地
+Element_3	火
+Element_4	風
+Element_5	毒
+Element_6	聖
+Element_7	闇
+Element_8	念
+Element_9	不死
+
+Mode_0	移動
+Mode_1	ルート
+Mode_2	追跡
+Mode_3	リンク
+Mode_4	詠唱反応(idle)
+Mode_5	Boss属性
+Mode_6	草属性
+Mode_7	攻撃(active)
+
+Item_0	回復アイテム
+Item_1	不明
+Item_2	消費アイテム
+Item_3	収集品アイテム
+Item_4	武器アイテム
+Item_5	防具アイテム
+Item_6	カード
+Item_7	ペットの卵
+Item_8	ペット専用装備品
+Item_9	不明
+Item_10	矢
+Item_11	
+Item_12	
+Item_13	
+Item_14	
+Item_15	
+Item_16	弾丸
+Item_17	苦無
+Item_18	強化装備アイテムの箱
+
+SearchItem_Caption	アイテム検索
+SearchItem_Search	検索
+SearchItem_Type		タイプ
+SearchItem_NamOrID	名称/ID
+SearchItem_Ok		OK
+SearchItem_Cancel	キャンセル
+
+SearchMob_Caption	検索
+SearchMob_Keyword	検索文字列
+SearchMob_Forward	次を検索(&F)
+SearchMob_Reverse	前を検索(&R)
+SearchMob_Close		閉じる

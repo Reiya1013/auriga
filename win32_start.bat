@@ -26,6 +26,12 @@ IF NOT EXIST .\save\pet.txt echo creating .\save\pet.txt
 IF NOT EXIST .\save\pet.txt type nul > .\save\pet.txt
 IF NOT EXIST .\save\storage.txt echo creating .\save\storage.txt
 IF NOT EXIST .\save\storage.txt type nul > .\save\storage.txt
+IF NOT EXIST .\save\s1_storage.txt echo creating .\save\s1_storage.txt
+IF NOT EXIST .\save\s1_storage.txt type nul > .\save\s1_storage.txt
+IF NOT EXIST .\save\s2_storage.txt echo creating .\save\s2_storage.txt
+IF NOT EXIST .\save\s2_storage.txt type nul > .\save\s2_storage.txt
+IF NOT EXIST .\save\s3_storage.txt echo creating .\save\s3_storage.txt
+IF NOT EXIST .\save\s3_storage.txt type nul > .\save\s3_storage.txt
 IF NOT EXIST .\save\g_storage.txt echo creating .\save\g_storage.txt
 IF NOT EXIST .\save\g_storage.txt type nul > .\save\g_storage.txt
 IF NOT EXIST .\conf\import\atcommand_conf.txt echo creating .\conf\import\atcommand_conf.txt

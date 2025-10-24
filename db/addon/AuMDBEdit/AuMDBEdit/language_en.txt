@@ -1,0 +1,92 @@
+LanguageType	English
+
+Menu_0	&File
+Menu_1	&Open...
+Menu_2	Open item_db.txt...
+Menu_3	&Save
+Menu_4	Save &As...
+Menu_5	&Exit
+Menu_6	&Edit
+Menu_7	&Undo
+Menu_8	&Copy Line
+Menu_9	&Paste Line
+Menu_10	&Delete Line
+Menu_11	&Search...
+Menu_12	&Add new data under selected data
+Menu_13	&Insert comment line
+Menu_14	&Option
+Menu_15	&Language
+Menu_16	&Setting...
+Menu_17	Insert '//'
+Menu_18	Remove '//'
+
+OptionForm_Label_0	Auto open 'mob_db.txt'
+OptionForm_Label_1	Auto open 'item_db.txt'
+
+Scale_0	Small
+Scale_1	Medium
+Scale_2	Large
+
+Race_0	Formless
+Race_1	Undead
+Race_2	Animal
+Race_3	Plant
+Race_4	Insect
+Race_5	Fish
+Race_6	Demon
+Race_7	Demihuman
+Race_8	Angel
+Race_9	Dragon
+
+Element_0	Neutral
+Element_1	Water
+Element_2	Earth
+Element_3	Fire
+Element_4	Wind
+Element_5	Poison
+Element_6	Holy
+Element_7	Shadow
+Element_8	Ghost
+Element_9	Undead
+
+Mode_0	CanMove
+Mode_1	Looter
+Mode_2	Aggressive
+Mode_3	Assist
+Mode_4	CastSensor_idle
+Mode_5	Boss
+Mode_6	Plant
+Mode_7	CanAttack
+
+Item_0	Healing item
+Item_1	Unknown
+Item_2	Useable item
+Item_3	Etc item
+Item_4	Weapon
+Item_5	Armer
+Item_6	Card
+Item_7	Pet egg
+Item_8	Pet equipment
+Item_9	Unknown
+Item_10	Arrows
+Item_11	Unknown
+Item_12	Unknown
+Item_13	Unknown
+Item_14	Unknown
+Item_15	Unknown
+Item_16	Bullets
+Item_17	Kunai
+Item_18	Special item
+
+SearchItem_Caption	Item Search
+SearchItem_Search	Seacrh
+SearchItem_Type		Type
+SearchItem_NamOrID	Name or ID
+SearchItem_Ok		OK
+SearchItem_Cancel	Cancel
+
+SearchMob_Caption	Search
+SearchMob_Keyword	Keyword
+SearchMob_Forward	&Forward
+SearchMob_Reverse	&Reverse
+SearchMob_Close		Close

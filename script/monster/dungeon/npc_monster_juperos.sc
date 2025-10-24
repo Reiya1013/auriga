@@ -27,3 +27,4 @@ jupe_core.gat,0,0,0,0	monster	フレイムディミック	1673,40,5000,0,0
 jupe_core.gat,0,0,0,0	monster	アークダム	1668,50,5000,0,0
 jupe_core.gat,0,0,0,0	monster	アポカリプス	1365,10,5000,0,0
 jupe_core.gat,0,0,0,0	monster	ヴェスパー	1685,1,7200000,3600000,1
+jupe_core.gat,0,0,0,0	monster	チャールストン3号	3124,1,7200000,3600000,1

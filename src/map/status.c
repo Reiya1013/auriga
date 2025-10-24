@@ -4731,9 +4731,9 @@ int status_get_ap(struct block_list *bl)
  * –ß‚è‚Í®”‚Å0ˆÈã
  *------------------------------------------
  */
-int status_get_max_hp(struct block_list *bl)
+long long status_get_max_hp(struct block_list *bl)
 {
-	int max_hp = 1;
+	long long max_hp = 1;
 
 	nullpo_retr(1, bl);
 
@@ -4762,13 +4762,13 @@ int status_get_max_hp(struct block_list *bl)
 			if(gc && ((struct mob_data*)bl)->guild_id == gc->guild_id) {
 				hp += gc->defense * 1000;
 			}
-			max_hp = (hp > 0x7FFFFFFF ? 0x7FFFFFFF : (int)hp);
+			max_hp = (hp > LLONG_MAX ? LLONG_MAX : (long long)hp);
 		} else if(bl->type == BL_PET && ((struct pet_data*)bl)) {
 			max_hp = mobdb_search(((struct pet_data*)bl)->class_)->max_hp;
 			if(mobdb_search(((struct pet_data*)bl)->class_)->mexp > 0) {
 				if(battle_config.mvp_hp_rate != 100) {
 					atn_bignumber hp = (atn_bignumber)max_hp * battle_config.mvp_hp_rate / 100;
-					max_hp = (hp > 0x7FFFFFFF ? 0x7FFFFFFF : (int)hp);
+					max_hp = (hp > LLONG_MAX ? LLONG_MAX : (long long)hp);
 				}
 			} else {
 				if(battle_config.monster_hp_rate != 100)

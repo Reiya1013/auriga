@@ -50,8 +50,8 @@ struct mobdb_data {
 	int class_;
 	char name[24],jname[24];
 	unsigned short lv;
-	int max_hp,max_sp;
-	int base_exp,job_exp;
+	long long max_hp,max_sp;
+	long long base_exp,job_exp;
 	int atk1,atk2;
 	int def,mdef;
 	int str,agi,vit,int_,dex,luk;

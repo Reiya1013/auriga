@@ -14760,7 +14760,7 @@ int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skil
 		if( !map[src->m].flag.turbo && (!map[src->m].flag.noteleport || map[src->m].flag.gvg) && !map[src->m].flag.nojump &&
 		    map_getcell(src->m,x,y,CELL_CHKPASS) && !map_count_oncell(src->m,x,y,BL_PC|BL_MOB|BL_NPC)
 		) {
-			unit_movepos(src,x,y,1);
+			unit_movepos(src,x,y,0x11);
 			clif_skill_nodamage(src,src,skillid,skilllv,1);
 		}
 		else if(sd)
@@ -20086,6 +20086,22 @@ static int skill_check_condition2_pc(struct map_session_data *sd, struct skill_c
 		switch(cnd->id)
 		{
 			case AM_DEMONSTRATION:
+			case BO_THE_WHOLE_PROTECTION:
+            case BO_ACIDIFIED_ZONE_WATER:
+            case BO_ACIDIFIED_ZONE_GROUND:
+            case BO_ACIDIFIED_ZONE_WIND:
+            case BO_ACIDIFIED_ZONE_FIRE:
+            case BO_WOODENWARRIOR:
+            case BO_HELLTREE:
+            case BO_WOODEN_FAIRY:
+            case BO_CREEPER:
+            case BO_ADVANCE_PROTECTION:
+            case GN_SPORE_EXPLOSION:
+            case GN_DEMONIC_FIRE:
+            case GN_FIRE_EXPANSION:
+            case GN_FIRE_EXPANSION_SMOKE_POWDER:
+            case GN_FIRE_EXPANSION_TEAR_GAS:
+            case GN_FIRE_EXPANSION_ACID:
 				if(battle_config.demonstration_nocost)
 					item_nocost = 1;
 				break;

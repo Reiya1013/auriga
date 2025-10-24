@@ -6,9 +6,9 @@
 //       grf: ./data.grf
 //   など。
 
-grf: C:\Gravity\Ragnarok\data.grf
-grf: C:\Gravity\Ragnarok\sdata.grf
-grf: C:\Gravity\Ragnarok\adata.grf
+grf: C:\Users\reiya\Documents\RO\@@RO_EMU_2025\data.grf
+grf: C:\Users\reiya\Documents\RO\@@RO_EMU_2025\sdata.grf
+grf: C:\Users\reiya\Documents\RO\@@RO_EMU_2025\adata.grf
 
 // datadir: <dataフォルダのディレクトリ>
 //   dataフォルダを利用していて且つdataフォルダの読み込みが最優先の場合などに設定する。

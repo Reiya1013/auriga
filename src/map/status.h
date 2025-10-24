@@ -47,7 +47,7 @@ struct status_pretimer {
 	int flag;
 };
 
-// ステータス異常データベース
+// ス�?ータス異常�?ータベ�?�ス
 struct scdata_db {
 	short save;
 	int releasable;
@@ -65,7 +65,7 @@ int status_get_group(struct block_list *bl);
 int status_get_hp(struct block_list *bl);
 int status_get_sp(struct block_list *bl);
 int status_get_ap(struct block_list *bl);
-int status_get_max_hp(struct block_list *bl);
+long long status_get_max_hp(struct block_list *bl);
 int status_get_max_sp(struct block_list *bl);
 int status_get_max_ap(struct block_list *bl);
 int status_get_str(struct block_list *bl);
@@ -148,7 +148,7 @@ int status_change_rate(struct block_list *bl,int type,int rate,int src_level);
 int status_change_copy(struct block_list *src,struct block_list *bl);
 int status_change_addeff_start(struct block_list *src, struct block_list *bl, int id, int rate, int type, unsigned int tick);
 
-// 状態チェック
+// 状態チェ�?ク
 int status_check_no_magic_damage(struct block_list *bl);
 
 #ifdef DYNAMIC_SC_DATA
@@ -157,7 +157,7 @@ int status_free_sc_data(struct status_change *sc);
 extern struct status_change_data dummy_sc_data[MAX_STATUSCHANGE];
 #endif
 
-// ステータス計算
+// ス�?ータス計�?
 int status_calc_pc(struct map_session_data* sd,int first);
 int status_calc_pc_stop_begin(struct block_list *bl);
 int status_calc_pc_stop_end(struct block_list *bl);
@@ -172,7 +172,7 @@ int status_readdb(void);
 
 int do_init_status(void);
 
-// ステータス異常番号テーブル
+// ス�?ータス異常番号�?ーブル
 enum {
 	SC_PROVOKE              = 0,
 	SC_ENDURE               = 1,
@@ -1073,7 +1073,7 @@ enum {
 	SC_SHINKIROU_CALL			= 898,
 	SC_NIGHTMARE				= 899,
 
-	// startでは使えないresistをアイテム側で全てクリアするための物
+	// startでは使えないresistをアイ�?�?側で全てクリアするための物
 	SC_RESISTCLEAR          = 1001,
 	SC_RACECLEAR            = 1002,
 	SC_SOUL                 = 1003,
@@ -1081,7 +1081,7 @@ enum {
 };
 
 // 状態アイコン
-// 厳密にはキャラクターの色の変化なども含まれている(爆裂波動など)
+// 厳�?にはキャラクターの色の変化なども含まれて�?�?(�?裂波動など)
 enum {
 	SI_BLANK            = 43,
 
@@ -2308,7 +2308,7 @@ enum {
 
 };
 
-// opt1テーブル
+// opt1�?ーブル
 enum {
 	OPT1_NORMAL			= 0,
 	OPT1_STONECURSE 	= 1,
@@ -2321,7 +2321,7 @@ enum {
 	OPT1_IMPRISON		= 8,
 };
 
-// opt2テーブル
+// opt2�?ーブル
 enum {
 	OPT2_NORMAL			= 0x0,
 	OPT2_POISON			= 0x1,
@@ -2335,7 +2335,7 @@ enum {
 	OPT2_FEAR			= 0x100,
 };
 
-// opt3テーブル
+// opt3�?ーブル
 enum {
 	OPT3_NORMAL				= 0x0,
 	OPT3_QUICKEN			= 0x1,
@@ -2358,7 +2358,7 @@ enum {
 	OPT3_CONTRACT			= 0x20000,
 };
 
-// オプションテーブル
+// オプション�?ーブル
 enum {
 	OPTION_NOTHING			= 0x0,
 	OPTION_SIGHT			= 0x1,
@@ -2393,7 +2393,7 @@ enum {
 	OPTION_MASK				= 0x7f8d7b8,
 };
 
-// Modeテーブル
+// Mode�?ーブル
 enum {
 	MD_CANMOVE				= 0x001,
 	MD_ITEMLOOT				= 0x002,
@@ -2422,14 +2422,14 @@ enum {
 	MD_DAMAGEREDUCTION_1000	= 0x1000000,
 };
 
-// ModeOptテーブル
+// ModeOpt�?ーブル
 enum {
-	MDOPT_DOUBLE       = 1, // ダブルアタック
-	MDOPT_NOATTACK     = 2, // 通常攻撃なし
-	MDOPT_FATALBLOW    = 3, // 急所攻撃
-	MDOPT_CRITICAL     = 4, // クリティカル攻撃
-	MDOPT_PERFECT_FREE = 5, // 完全回避
-	MDOPT_STEELCROW    = 6, // スチールクロウ
+	MDOPT_DOUBLE       = 1, // ダブルアタ�?ク
+	MDOPT_NOATTACK     = 2, // 通常攻�?な�?
+	MDOPT_FATALBLOW    = 3, // 急所攻�?
+	MDOPT_CRITICAL     = 4, // クリ�?ィカル攻�?
+	MDOPT_PERFECT_FREE = 5, // 完�?�回避
+	MDOPT_STEELCROW    = 6, // スチ�?�ルクロウ
 };
 
 // カートテーブル
@@ -2446,7 +2446,7 @@ enum {
 	CART_TYPE_LEVEL131	= 0x9,
 };
 
-// hat_effectテーブル
+// hat_effect�?ーブル
 enum {
 	HAT_EF_MIN = 0,
 	HAT_EF_BLOSSOM_FLUTTERING,
