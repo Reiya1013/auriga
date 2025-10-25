@@ -389,7 +389,7 @@ struct square;
 
 // ステータスデータ
 struct status_data {
-	int max_hp;
+	long long max_hp;
 	short str,agi,vit,int_,dex,luk;
 	short pow,sta,wis,spl,con,crt;
 	int atk,matk;
@@ -417,7 +417,7 @@ struct map_session_data {
 		unsigned gangsterparadise : 1;
 		unsigned taekwonrest : 1;
 		unsigned potionpitcher_flag : 1;
-		unsigned storage_flag : 3;	// 0:倉庫未使用, 1:個人倉庫使用中, 2:ギルド倉庫使用中, 3:サブ1倉庫使用中, 4:サブ2倉庫使用中, 5:サブ3倉庫使用中
+		unsigned storage_flag : 3;	// 0:倉庫未使用, 1:個人倉庫使用中, 2:ギルド倉庫使用中 ,3:サブ倉庫1使用中 ,4:サブ倉庫2使用中 ,5:サブ倉庫3使用中
 		unsigned autoloot : 1;
 		unsigned refuse_emergencycall : 1;
 		unsigned reg_dirty : 1;
@@ -868,7 +868,7 @@ struct map_session_data {
 	int cloaked_npc[MAX_CLOAKEDNPC];
 
 	struct {
-		int max_hp, max_sp;
+		long long max_hp, max_sp;
 		int atk, matk, def, mdef;
 		int hit, critical, flee, aspd, speed;
 	} fix_status;
@@ -1015,7 +1015,8 @@ struct mob_data {
 	struct status_change sc;
 	short n;
 	int base_class,class_;
-	short dir,mode;
+	int mode;
+	short dir;
 	short m,x0,y0,xs,ys;
 	short idlecount;
 	char name[24];
@@ -1037,7 +1038,7 @@ struct mob_data {
 	struct status_data st;
 	short effect;
 	short speed;
-	int hp;
+	long long hp;
 	int target_id,attacked_id,attacked_players;
 	unsigned int next_walktime;
 	unsigned int last_spawntime,last_thinktime;
